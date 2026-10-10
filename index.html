@@ -60,14 +60,20 @@ a{color:#1A7458}.dark a{color:var(--gold)}
 .g2{display:grid;grid-template-columns:1fr 1fr}.sl{color:var(--mint);font-size:15px;margin-top:8px}
 select{width:100%;background:var(--card2);color:var(--cream);border:1px solid var(--gold);border-radius:999px;padding:13px 16px;font:inherit;font-size:16px}
 .kb{text-align:center;padding:12px;border-radius:12px;background:var(--card2);color:var(--mint);font-weight:600}.kb.ok{background:#1f6b45;color:#fff}
+.elist{max-height:340px;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--card2);border-radius:14px;padding:4px 6px}
+.er{display:flex;align-items:center;gap:10px;width:100%;background:none;color:var(--cream);padding:11px 6px;border-bottom:.5px solid #3f6a58;text-align:left;border-radius:8px}
+.er.on{background:var(--card);outline:1px solid var(--gold)}.en{color:var(--gold);width:26px;font-size:13px;flex:none}.et{flex:1;line-height:1.35}.et small{color:var(--mint);font-size:12.5px;margin-left:6px}.ea{font-size:24px;color:var(--gold);direction:rtl;flex:none;line-height:1.5}
+#sheet{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateX(100%);opacity:.6;visibility:hidden;transition:transform .42s cubic-bezier(.22,.8,.28,1),opacity .35s ease,visibility 0s linear .42s;box-shadow:-18px 0 40px rgba(0,0,0,.45)}
+#sheet.open{transform:none;opacity:1;visibility:visible;transition:transform .42s cubic-bezier(.22,.8,.28,1),opacity .35s ease,visibility 0s}
+.shin{max-width:560px;margin:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:13px}
 .hint{text-align:center;color:var(--mint);font-size:14px}
 #tabs{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid #355C4D;padding-bottom:env(safe-area-inset-bottom,0px)}
 #tabs div{max-width:560px;margin:auto;display:flex;justify-content:space-around;padding:8px 0}
 #tabs button{background:none;color:var(--mint);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:4px 8px}#tabs button i{font-style:normal;font-size:21px}
 #tabs button.on{color:var(--gold)}
-#toast{position:fixed;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px));max-width:528px;margin:auto;background:var(--gold);color:var(--bg);padding:12px 14px;border-radius:12px;font-weight:600;display:none;z-index:9}
+#toast{position:fixed;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px));max-width:528px;margin:auto;background:var(--gold);color:var(--bg);padding:12px 14px;border-radius:12px;font-weight:600;display:none;z-index:40}
 </style></head><body>
-<div id="app"></div>
+<div id="app"></div><div id="sheet"></div>
 <nav id="tabs"><div></div></nav><div id="toast"></div>
 <script>
 const D={"countries":{"Türkiye":["İstanbul","Ankara","İzmir","Bursa","Konya","Antalya","Kahramanmaraş","Malatya","Trabzon","Gaziantep"],"Almanya":["Berlin","Hamburg","Münih","Köln"],"Fransa":["Paris","Lyon"],"Hollanda":["Amsterdam","Rotterdam"],"Belçika":["Brüksel","Anvers"],"Birleşik Krallık":["Londra","Manchester"],"ABD":["New York","Chicago"],"Suudi Arabistan":["Mekke","Medine"]},"zikirs":[{"name":"Sübhanallah","arabic":"سُبْحَانَ اللّٰهِ","meaning":"Allah’ı eksikliklerden uzak tutarım."},{"name":"Elhamdülillah","arabic":"الْحَمْدُ لِلّٰهِ","meaning":"Hamd Allah’a mahsustur."},{"name":"Allahu Ekber","arabic":"اللّٰهُ أَكْبَرُ","meaning":"Allah en büyüktür."},{"name":"Estağfirullah","arabic":"أَسْتَغْفِرُ اللّٰهَ","meaning":"Allah’tan bağışlanma dilerim."},{"name":"Lâ ilâhe illallah","arabic":"لَا إِلٰهَ إِلَّا اللّٰهُ","meaning":"Allah’tan başka ilah yoktur."},{"name":"Salavat","arabic":"اللّٰهُمَّ صَلِّ عَلَى مُحَمَّدٍ","meaning":"Allah’ım, Muhammed’e salât eyle."}],"duas":[{"name":"Hz. Yunus’un Duası","cat":"Peygamber","ar":"لَا إِلَٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ","pron":"Lâ ilâhe illâ ente sübhâneke innî küntü mine’z-zâlimîn.","meaning":"Senden başka ilah yoktur. Seni eksikliklerden uzak tutarım. Ben kendine zulmedenlerden oldum. (Enbiyâ 21:87)"},{"name":"Hz. Musa’nın Duası","cat":"Peygamber","ar":"رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي","pron":"Rabbi’şrah lî sadrî ve yessir lî emrî.","meaning":"Rabbim, gönlüme ferahlık ver ve işimi kolaylaştır. (Tâhâ 20:25-26)"},{"name":"İstiğfar","cat":"Tövbe","ar":"أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ","pron":"Estağfirullâhe ve etûbü ileyh.","meaning":"Allah’tan bağışlanma diler ve O’na tövbe ederim."},{"name":"Yemek Öncesi","cat":"Günlük","ar":"بِسْمِ اللَّهِ","pron":"Bismillâh.","meaning":"Allah’ın adıyla."},{"name":"Rükû Tesbihi","cat":"Namaz","ar":"سُبْحَانَ رَبِّيَ الْعَظِيمِ","pron":"Sübhâne rabbiye’l-azîm.","meaning":"Yüce Rabbimi eksikliklerden uzak tutarım."},{"name":"Secde Tesbihi","cat":"Namaz","ar":"سُبْحَانَ رَبِّيَ الْأَعْلَى","pron":"Sübhâne rabbiye’l-a’lâ.","meaning":"En yüce Rabbimi eksikliklerden uzak tutarım."}],"lessons":[{"name":"Abdest Nasıl Alınır?","category":"İbadet","intro":"Abdest, belirli organların yıkanması ve mesh edilmesiyle yapılan ibadet temizliğidir.","steps":[{"title":"Farzlar","body":"Hanefî mezhebine göre yüzü yıkamak, kolları dirseklerle birlikte yıkamak, başın en az dörtte birini mesh etmek, ayakları topuklarla birlikte yıkamak abdestin farzlarıdır.","note":"Mezheplere göre bazı ayrıntılar farklı olabilir."},{"title":"Eller, ağız ve burun","body":"Niyet ve besmeleden sonra eller yıkanır; ağıza ve buruna üçer defa su verilir.","note":"Niyet Hanefî mezhebinde sünnettir."},{"title":"Yüz ve kollar","body":"Yüzün tamamı yıkanır. Önce sağ sonra sol kol dirseklerle birlikte yıkanır.","note":"Yıkanması gereken yerlerde kuru alan bırakılmaz."},{"title":"Mesh ve ayaklar","body":"Baş mesh edilir, kulaklar mesh edilir. Ayaklar topuklarla birlikte yıkanır.","note":"Parmak aralarına su ulaşmalıdır."}]},{"name":"Gusül Abdesti","category":"İbadet","intro":"Gusül bütün bedenin dinen gerekli şekilde yıkanmasıdır.","steps":[{"title":"Guslün farzları","body":"Hanefî mezhebine göre ağza su vermek, buruna su vermek ve bütün bedeni yıkamak farzdır.","note":"Kuru yer kalmamasına dikkat edilir."},{"title":"Hazırlık","body":"Niyet edilir, besmele çekilir, eller ve kirli bölgeler temizlenir.","note":"Niyet ve besmele sünnetlerdendir."},{"title":"Bütün beden","body":"Ağıza ve buruna su verildikten sonra baş ve bütün vücut yıkanır.","note":"Suyun deriyle temasını engelleyen maddeler giderilmelidir."}]},{"name":"Teyemmüm","category":"İbadet","intro":"Su bulunmadığında veya geçerli mazeretle kullanılamadığında yapılan temizlik.","steps":[{"title":"Şartlar","body":"Suyun bulunmaması veya kullanımının mümkün olmaması gibi geçerli mazeretler değerlendirilir.","note":"Su varken sırf kolaylık için yapılmaz."},{"title":"Niyet ve yüz","body":"Niyet edilir. Eller uygun temiz yüzeye vurularak yüz mesh edilir.","note":"Niyet gereklidir."},{"title":"Kollar","body":"Eller tekrar yüzeye vurularak kollar dirseklerle birlikte mesh edilir.","note":"Hanefî uygulaması esas alınmıştır."}]},{"name":"Oruç ve Ramazan","category":"İbadet","intro":"Oruç, imsak ile gün batımı arasında belirli davranışlardan ibadet niyetiyle uzak durmaktır.","steps":[{"title":"Niyet","body":"Oruç için niyet edilir; sahur yapmak sünnettir.","note":"Niyetin zamanı oruç türüne göre değişebilir."},{"title":"Orucu korumak","body":"Yeme, içme ve orucu bozan davranışlardan uzak durulur.","note":"Tıbbi durumlar için güvenilir fetvaya başvurulur."},{"title":"İftar","body":"Güneş battıktan sonra oruç açılır; dua ve paylaşma önemlidir.","note":"İhtiyaç sahipleri gözetilir."}]},{"name":"Sabah Namazı","category":"Namaz","intro":"İki rekât sünnet ve iki rekât farz.","steps":[{"title":"Hazırlık","body":"Abdest, vakit, kıble, örtünme ve niyet kontrol edilir.","note":"Namazın şartları yerine getirilir."},{"title":"Sünnet","body":"İki rekât sünnet kılınır, son oturuş ve selamla tamamlanır.","note":"Sünnet için ayrı niyet edilir."},{"title":"Farz","body":"İki rekât farz tek başına veya cemaatle kılınır.","note":"İmama uyma hükümleri mezhebe göre değişebilir."}]},{"name":"Öğle Namazı","category":"Namaz","intro":"Dört ilk sünnet, dört farz, iki son sünnet.","steps":[{"title":"İlk sünnet","body":"Dört rekât ilk sünnete niyet edilir.","note":"Oturuş sırası öğrenilir."},{"title":"Farz","body":"Dört rekât farza niyet edilir.","note":"Cemaatle kılınırken imam takip edilir."},{"title":"Son sünnet","body":"İki rekât son sünnet kılınır.","note":"Her bölüm için niyet ayrıdır."}]},{"name":"İkindi Namazı","category":"Namaz","intro":"Dört sünnet ve dört farz.","steps":[{"title":"Sünnet","body":"Dört rekât gayrimüekked sünnet kılınabilir.","note":"İlk oturuştaki uygulama farklarını öğren."},{"title":"Farz","body":"Dört rekât farz kılınır.","note":"Kıraat ve oturuş sırası önemlidir."}]},{"name":"Akşam Namazı","category":"Namaz","intro":"Üç farz ve iki sünnet.","steps":[{"title":"Farz","body":"Üç rekât farz kılınır; ikinci rekâttan sonra ilk oturuş vardır.","note":"Üçüncü rekâtın kıraati farklıdır."},{"title":"Sünnet","body":"İki rekât sünnet kılınır.","note":"Son oturuş ve selamla tamamlanır."}]},{"name":"Yatsı ve Vitir","category":"Namaz","intro":"Dört ilk sünnet, dört farz, iki son sünnet ve üç vitir.","steps":[{"title":"Yatsı","body":"Sünnet ve farz bölümleri sırasıyla kılınır.","note":"Her bölümün niyeti ayrıdır."},{"title":"Vitir","body":"Hanefî mezhebine göre vitir üç rekât ve vaciptir.","note":"Diğer mezheplerde farklı uygulamalar bulunur."},{"title":"Kunut","body":"Üçüncü rekâtta kıraatten sonra tekbir alınarak kunut duaları okunur.","note":"Kunut duaları ayrıca öğrenilir."}]},{"name":"Cenaze Namazı","category":"Namaz","intro":"Rükû ve secdesi bulunmayan, ayakta kılınan namaz.","steps":[{"title":"İlk tekbir","body":"Niyet edilir, tekbirden sonra Sübhâneke okunur.","note":"Farz-ı kifâyedir."},{"title":"İkinci tekbir","body":"Salavatlar okunur.","note":"Rükû ve secde yapılmaz."},{"title":"Üçüncü tekbir","body":"Cenaze için dua edilir.","note":"Duanın tam metni ayrıca doğrulanmalıdır."},{"title":"Dördüncü tekbir","body":"Tekbirden sonra selam verilir.","note":"Hanefî uygulamasının özetidir."}]},{"name":"Bayram Namazı","category":"Namaz","intro":"Cemaatle kılınan iki rekâtlık namaz.","steps":[{"title":"İlk rekât","body":"Hanefî uygulamasında üç ilave tekbir alınır.","note":"İmam takip edilir."},{"title":"İkinci rekât","body":"Kıraatten sonra üç ilave tekbir alınır.","note":"Namazdan sonra hutbe dinlenir."}]},{"name":"Namaz Duaları","category":"Dualar","intro":"Namazda okunan temel dualar.","steps":[{"title":"Sübhâneke","body":"Başlangıç duasının anlamı ve okunuşu öğrenilir.","note":"Arapça metin ayrı doğrulanmış içerik olarak eklenecek."},{"title":"Ettehiyyâtü","body":"Oturuş duasının yeri öğrenilir.","note":"İlk ve son oturuş ayrımına dikkat edilir."},{"title":"Salavat ve Rabbenâ","body":"Salli, Bârik ve Rabbenâ duaları öğrenilir.","note":"Vitirde kunut duaları ayrıca çalışılır."}]},{"name":"Kısa Sureler","category":"Dualar","intro":"Namazda sık okunan sureleri tanı.","steps":[{"title":"Fâtiha","body":"Fâtiha suresinin anlamı ve namazdaki yeri.","note":"Tam ayet metinleri doğrulanmış veri kaynağıyla eklenecek."},{"title":"İhlâs","body":"Allah’ın birliğini anlatır.","note":"Tevhid konusu."},{"title":"Felak ve Nâs","body":"Allah’a sığınmayı konu edinir.","note":"Surelerin tam metni kaynak kontrolüyle eklenecek."}]},{"name":"Tövbe ve İstiğfar","category":"Maneviyat","intro":"Hatalardan dönme ve bağışlanma dileme.","steps":[{"title":"Pişmanlık","body":"Yanlış davranış için içtenlikle pişmanlık duyulur.","note":"Samimiyet önemlidir."},{"title":"Terk ve kararlılık","body":"Yanlış bırakılır ve tekrarlanmaması için karar verilir.","note":"Davranış değişikliği gerekir."},{"title":"Kul hakkı","body":"Başkasının hakkı ihlal edilmişse iade veya helalleşme gözetilir.","note":"Kul hakkı özel sorumluluktur."}]},{"name":"Peygamberimizin Hayatı","category":"Siyer","intro":"Hz. Muhammed’in hayatından temel dönemler.","steps":[{"title":"Çocukluk","body":"Mekke’de doğumu, ailesi ve gençlik dönemi.","note":"Siyer kronolojisi takip edilir."},{"title":"İlk vahiy","body":"Hira’da ilk vahiy ve tebliğin başlangıcı.","note":"Mekke dönemi yaklaşık 13 yıldır."},{"title":"Hicret","body":"Medine’ye hicret ve toplumun kuruluşu.","note":"İslam tarihinde dönüm noktasıdır."},{"title":"Veda Hutbesi","body":"Adalet, sorumluluk ve insan hakları vurguları.","note":"Kaynaklar üzerinden ayrıntılı incelenmelidir."}]},{"name":"İmanın Şartları","category":"İnanç","intro":"İslam inancının temel esasları.","steps":[{"title":"Allah’a iman","body":"Allah’ın birliği ve sıfatları.","note":"Tevhid esastır."},{"title":"Meleklere ve kitaplara iman","body":"Meleklerin ve ilahi kitapların dinî yeri.","note":"Gayba iman açıklanır."},{"title":"Peygamberler","body":"Peygamberlerin rehberliği.","note":"Örnek ahlak önemlidir."},{"title":"Ahiret ve kader","body":"Sorumluluk, ahiret ve kader kavramları.","note":"Güvenilir kaynaklarla ayrıntılandırılır."}]}],"sources":{"vakit":"https://namazvakitleri.diyanet.gov.tr/","kuran":"https://kuran.diyanet.gov.tr/","namaz":"https://namaz.diyanet.gov.tr/"}};
@@ -79,7 +85,105 @@ const EN={Türkiye:'Turkey',Almanya:'Germany',Fransa:'France',Hollanda:'Netherla
 const PR5=[['Sabah','Fajr'],['Öğle','Dhuhr'],['İkindi','Asr'],['Akşam','Maghrib'],['Yatsı','Isha']];
 const RK={'Sabah':[['Sünnet',2,'sunnet'],['Farz',2,'farz']],'Öğle':[['İlk Sünnet',4,'sunnet'],['Farz',4,'farz'],['Son Sünnet',2,'sunnet']],'İkindi':[['Sünnet',4,'sunnet'],['Farz',4,'farz']],'Akşam':[['Farz',3,'farz'],['Son Sünnet',2,'sunnet']],'Yatsı':[['İlk Sünnet',4,'sunnet'],['Farz',4,'farz'],['Son Sünnet',2,'sunnet'],['Vitir',3,'vitir']]};
 const AYET=[[`فَإِنَّ مَعَ الْعُسْرِ يُسْرًا`,`Şüphesiz güçlükle beraber bir kolaylık vardır.`,`İnşirâh 94:5`],[`أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ`,`Biliniz ki kalpler ancak Allah’ı anmakla huzur bulur.`,`Ra‘d 13:28`],[`لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا`,`Allah hiç kimseye gücünün yettiğinden fazlasını yüklemez.`,`Bakara 2:286`],[`فَاذْكُرُونِي أَذْكُرْكُمْ`,`Siz beni anın, ben de sizi anayım.`,`Bakara 2:152`],[`وَمَنْ يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ`,`Kim Allah’a güvenirse O, ona yeter.`,`Talâk 65:3`],[`لَا تَقْنَطُوا مِنْ رَحْمَةِ اللَّهِ`,`Allah’ın rahmetinden ümit kesmeyin.`,`Zümer 39:53`]];
-const ESMA=[[`الرَّحْمَٰنُ`,`Er-Rahmân`,`Rahmeti bütün varlıkları kuşatan`],[`الرَّحِيمُ`,`Er-Rahîm`,`Çok merhamet eden`],[`الْمَلِكُ`,`El-Melik`,`Mülkün gerçek sahibi`],[`الْقُدُّوسُ`,`El-Kuddûs`,`Her türlü eksiklikten uzak`],[`السَّلَامُ`,`Es-Selâm`,`Esenlik veren`],[`الْغَفَّارُ`,`El-Gaffâr`,`Çok bağışlayan`],[`الْوَهَّابُ`,`El-Vehhâb`,`Karşılıksız çok veren`],[`الرَّزَّاقُ`,`Er-Rezzâk`,`Rızık veren`],[`الْفَتَّاحُ`,`El-Fettâh`,`Hayır kapılarını açan`],[`الْعَلِيمُ`,`El-Alîm`,`Her şeyi bilen`]];
+const ESMA=`Er-Rahmân|الرَّحْمَٰنُ|Dünyada bütün varlıklara merhamet eden
+Er-Rahîm|الرَّحِيمُ|Ahirette müminlere çok merhamet eden
+El-Melik|الْمَلِكُ|Mülkün gerçek sahibi
+El-Kuddûs|الْقُدُّوسُ|Her türlü eksiklikten uzak, tertemiz
+Es-Selâm|السَّلَامُ|Esenlik ve selamet veren
+El-Mü’min|الْمُؤْمِنُ|Güven veren, emniyet bağışlayan
+El-Müheymin|الْمُهَيْمِنُ|Her şeyi görüp gözeten
+El-Azîz|الْعَزِيزُ|Güçlü, yenilmez, izzet sahibi
+El-Cebbâr|الْجَبَّارُ|Dilediğini yapmaya gücü yeten
+El-Mütekebbir|الْمُتَكَبِّرُ|Büyüklükte eşi olmayan
+El-Hâlık|الْخَالِقُ|Yaratan
+El-Bâri’|الْبَارِئُ|Yoktan var eden
+El-Musavvir|الْمُصَوِّرُ|Şekil ve suret veren
+El-Gaffâr|الْغَفَّارُ|Çok bağışlayan
+El-Kahhâr|الْقَهَّارُ|Her şeye galip gelen
+El-Vehhâb|الْوَهَّابُ|Karşılıksız çok veren
+Er-Rezzâk|الرَّزَّاقُ|Rızık veren
+El-Fettâh|الْفَتَّاحُ|Hayır kapılarını açan
+El-Alîm|الْعَلِيمُ|Her şeyi bilen
+El-Kâbıd|الْقَابِضُ|Daraltan, ruhları alan
+El-Bâsıt|الْبَاسِطُ|Genişleten, bolluk veren
+El-Hâfıd|الْخَافِضُ|Alçaltan
+Er-Râfi’|الرَّافِعُ|Yükselten
+El-Mu’izz|الْمُعِزُّ|İzzet veren
+El-Müzill|الْمُذِلُّ|Zillete düşüren
+Es-Semî’|السَّمِيعُ|Her şeyi işiten
+El-Basîr|الْبَصِيرُ|Her şeyi gören
+El-Hakem|الْحَكَمُ|Hükmeden, hakkı yerine getiren
+El-Adl|الْعَدْلُ|Çok adil
+El-Latîf|اللَّطِيفُ|Lütuf ve incelik sahibi
+El-Habîr|الْخَبِيرُ|Her şeyden haberdar olan
+El-Halîm|الْحَلِيمُ|Çok sabırlı, yumuşak davranan
+El-Azîm|الْعَظِيمُ|Pek yüce
+El-Gafûr|الْغَفُورُ|Günahları örtüp bağışlayan
+Eş-Şekûr|الشَّكُورُ|Az amele çok karşılık veren
+El-Aliyy|الْعَلِيُّ|Çok yüce
+El-Kebîr|الْكَبِيرُ|Pek büyük
+El-Hafîz|الْحَفِيظُ|Koruyan, muhafaza eden
+El-Mukît|الْمُقِيتُ|Besleyen, gıda veren
+El-Hasîb|الْحَسِيبُ|Hesaba çeken, yeten
+El-Celîl|الْجَلِيلُ|Celal sahibi
+El-Kerîm|الْكَرِيمُ|Çok cömert
+Er-Rakîb|الرَّقِيبُ|Her şeyi gözetleyen
+El-Mücîb|الْمُجِيبُ|Duaları kabul eden
+El-Vâsi’|الْوَاسِعُ|Her şeyi kuşatan, ilmi geniş
+El-Hakîm|الْحَكِيمُ|Hikmet sahibi
+El-Vedûd|الْوَدُودُ|Seven ve sevilen
+El-Mecîd|الْمَجِيدُ|Şanı yüce
+El-Bâis|الْبَاعِثُ|Ölüleri dirilten
+Eş-Şehîd|الشَّهِيدُ|Her şeye şahit olan
+El-Hakk|الْحَقُّ|Varlığı hiç değişmeyen gerçek
+El-Vekîl|الْوَكِيلُ|Güvenilen, işleri üstlenen
+El-Kaviyy|الْقَوِيُّ|Çok kuvvetli
+El-Metîn|الْمَتِينُ|Çok sağlam, sarsılmaz
+El-Veliyy|الْوَلِيُّ|Dost, yardımcı
+El-Hamîd|الْحَمِيدُ|Övülmeye layık
+El-Muhsî|الْمُحْصِي|Her şeyi sayan, bilen
+El-Mübdi’|الْمُبْدِئُ|Yoktan var eden
+El-Mu’îd|الْمُعِيدُ|Yeniden yaratan
+El-Muhyî|الْمُحْيِي|Hayat veren
+El-Mümît|الْمُمِيتُ|Öldüren
+El-Hayy|الْحَيُّ|Daima diri
+El-Kayyûm|الْقَيُّومُ|Her şeyi ayakta tutan
+El-Vâcid|الْوَاجِدُ|Hiçbir şeye muhtaç olmayan
+El-Mâcid|الْمَاجِدُ|Şerefi çok yüce
+El-Vâhid|الْوَاحِدُ|Bir olan
+El-Ahad|الْأَحَدُ|Tek
+Es-Samed|الصَّمَدُ|Her şey kendisine muhtaç olan
+El-Kâdir|الْقَادِرُ|Her şeye gücü yeten
+El-Muktedir|الْمُقْتَدِرُ|Kudreti sınırsız
+El-Mukaddim|الْمُقَدِّمُ|Öne alan
+El-Muahhir|الْمُؤَخِّرُ|Geri bırakan
+El-Evvel|الْأَوَّلُ|Başlangıcı olmayan ilk
+El-Âhir|الْآخِرُ|Sonu olmayan son
+Ez-Zâhir|الظَّاهِرُ|Varlığı apaçık olan
+El-Bâtın|الْبَاطِنُ|Zatı gizli olan
+El-Vâlî|الْوَالِي|Her şeyi idare eden
+El-Müteâlî|الْمُتَعَالِي|Çok yüce
+El-Berr|الْبَرُّ|İyilik ve ihsanı bol
+Et-Tevvâb|التَّوَّابُ|Tövbeleri kabul eden
+El-Müntakim|الْمُنْتَقِمُ|Zalimlerin cezasını veren
+El-Afüvv|الْعَفُوُّ|Affeden
+Er-Raûf|الرَّءُوفُ|Çok şefkatli
+Mâlikül-Mülk|مَالِكُ الْمُلْكِ|Mülkün sahibi
+Zül-Celâli vel-İkrâm|ذُو الْجَلَالِ وَالْإِكْرَامِ|Celal ve ikram sahibi
+El-Muksit|الْمُقْسِطُ|Adaletle hükmeden
+El-Câmi’|الْجَامِعُ|Toplayan
+El-Ganiyy|الْغَنِيُّ|Hiçbir şeye ihtiyacı olmayan, zengin
+El-Mugnî|الْمُغْنِي|Zenginlik veren
+El-Mâni’|الْمَانِعُ|Engelleyen, koruyan
+Ed-Dârr|الضَّارُّ|Zarar verecek şeyleri yaratan
+En-Nâfi’|النَّافِعُ|Fayda veren
+En-Nûr|النُّورُ|Nur veren, aydınlatan
+El-Hâdî|الْهَادِي|Hidayet veren
+El-Bedî’|الْبَدِيعُ|Eşsiz yaratan
+El-Bâkî|الْبَاقِي|Varlığı sonsuz
+El-Vâris|الْوَارِثُ|Her şeyin gerçek varisi
+Er-Reşîd|الرَّشِيدُ|Doğru yolu gösteren
+Es-Sabûr|الصَّبُورُ|Çok sabırlı`.split('\n').map(l=>{const p=l.split('|');return [p[1],p[0],p[2]]});
 const X={
 tek:[`Tekbir`,`اللَّهُ أَكْبَرُ`,`Allâhü ekber`,`Allah en büyüktür.`],
 sub:[`Sübhâneke`,`سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ وَتَبَارَكَ اسْمُكَ وَتَعَالَى جَدُّكَ وَلَا إِلَهَ غَيْرُكَ`,`Sübhâneke Allâhümme ve bihamdik, ve tebârekesmük, ve teâlâ ceddük, ve lâ ilâhe gayrük.`,`Allah’ım! Seni eksikliklerden uzak tutar, överim. Senin adın mübarektir, şanın yücedir. Senden başka ilah yoktur.`],
@@ -117,11 +221,11 @@ const prayerData=[['Sabah','2 sünnet · 2 farz'],['Öğle','4 ilk sünnet · 4 
 const starts=[1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
 const DEMO={Fajr:'05:12',Sunrise:'06:41',Dhuhr:'12:30',Asr:'15:28',Maghrib:'18:05',Isha:'19:28'};
 const NAMES={ayet:'Günün Ayeti',esma:'Esmaül Hüsna',dua:'Günün Duası'};
-const init={setup:false,country:'Türkiye',city:'İstanbul',notifications:true,daily:{ayet:true,esma:true,dua:false},counts:{},favZ:[],favD:[],custom:[],page:1,bookmarks:[],savedLessons:[],completed:[],lastSurah:0,goal:33,zikir:'Sübhanallah',lat:null,lon:null,cc:'',auto:false,np:{on:true,list:{Sabah:true,Öğle:true,İkindi:true,Akşam:true,Yatsı:true},sound:'melodi',vib:'uzun',before:0},dn:{ayet:true,hadis:true,esma:true,dua:false,time:'09:00'}};
+const init={setup:false,country:'Türkiye',city:'İstanbul',notifications:true,daily:{ayet:true,esma:true,dua:false},counts:{},favZ:[],favD:[],custom:[],page:1,bookmarks:[],savedLessons:[],completed:[],lastSurah:0,goal:33,zikir:'Sübhanallah',esma:0,lat:null,lon:null,cc:'',auto:false,np:{on:true,list:{Sabah:true,Öğle:true,İkindi:true,Akşam:true,Yatsı:true},sound:'melodi',vib:'uzun',before:0},dn:{ayet:true,hadis:true,esma:true,dua:false,time:'09:00'}};
 let S=Object.assign({},init);try{S=Object.assign(S,JSON.parse(localStorage.getItem('mihra-v1')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('mihra-v1',JSON.stringify(S))}catch(e){}};
 const blank=()=>({name:'',cat:'Kişisel',ar:'',pron:'',meaning:''});
-const U={stage:S.setup?3:0,tab:'Vakitler',settings:false,zs:'Zikirmatik',duaCat:'Günlük',duaOpen:'',edit:-1,draft:blank(),lcat:'İbadet',lesson:'',step:0,prayer:'Öğle',guide:false,qv:'Sureler',query:'',openS:0,gpart:0,gstep:0,gmode:'alone',gopen:false,gfor:'',vopen:'',ayi:-1,esi:-1,stab:'Konum',fs:22,loc:'idle',locErr:'',manual:false,pc:null,cityRes:[],cityMsg:''};
+const U={stage:S.setup?3:0,tab:'Vakitler',settings:false,zs:'Zikirmatik',duaCat:'Günlük',duaOpen:'',edit:-1,draft:blank(),lcat:'İbadet',lesson:'',step:0,prayer:'Öğle',guide:false,qv:'Sureler',query:'',openS:0,gpart:0,gstep:0,gmode:'alone',gopen:false,gfor:'',vopen:'',ayi:-1,esi:-1,stab:'Konum',wst:'zumrut',fs:22,loc:'idle',locErr:'',manual:false,pc:null,cityRes:[],cityMsg:''};
 const T={status:'idle',t:null,lat:null,lon:null,demo:false,gps:null};
 const K={aligned:false,heading:null,st:'idle',on:false,msg:''};
 const iosPerm=typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function';
@@ -179,16 +283,8 @@ function vKib(){const b=bearing(),al=K.aligned&&b!=null&&K.heading!=null;
 return Pn(`<div class="gold c" style="font-size:20px">Kıble Pusulası</div><svg viewBox="0 0 240 240" style="width:min(86vw,330px);margin:4px auto;display:block"><circle id="ring" cx="120" cy="120" r="108" fill="#285544" stroke="${al?'#7BE0A4':'#E7C98B'}" stroke-width="4"/><circle cx="120" cy="120" r="90" fill="none" stroke="#5E806E" stroke-dasharray="3 6"/><text x="120" y="34" text-anchor="middle" fill="#E7C98B" font-size="15" font-weight="700" letter-spacing="2">KIBLE</text><path d="M113 40h14l-7 8z" fill="#E7C98B"/><g id="arrow" transform="rotate(${rot()} 120 120)"><line x1="120" y1="120" x2="120" y2="92" stroke="#E7C98B" stroke-width="7" stroke-linecap="round"/><rect x="98" y="52" width="44" height="40" fill="#10241f" stroke="#E7C98B" stroke-width="3"/><rect x="98" y="60" width="44" height="9" fill="#E7C98B"/></g><circle cx="120" cy="120" r="12" fill="#fff"/></svg><div class="gl c">${b==null?'—':Math.round(b)+'°'}</div><div id="kb" class="kb${al?' ok':''}">${al?'✓ Kıble bulundu':'Kıble simgesini üstteki KIBLE yazısına getir'}</div><p class="mint sm c">${b==null?'Konum bulunamadı. Ayarlar’dan konumunu güncelle ya da şehrini seç.':'Kıble açısı (kuzeye göre): '+esc(S.city)}</p>`+(K.st==='need'||K.st==='denied'?B('Pusulayı aç','compass'):'')+(K.st==='demo'?`<div class="row">${B('↺','simL',0,1)}${B('↻','simR',0,1)}</div>`:'')+`<p class="mint sm">${esc(K.st==='ok'?'Pusula otomatik çalışıyor. Telefonu düz tut; metal ve manyetik kılıflardan uzak tut.':K.st==='wait'?'Pusula verisi bekleniyor…':K.msg||'Pusula otomatik başlatılır.')}</p>`,1)+'<div class="ad">Reklam alanı</div>'}
 
 /* ---- Zikir ---- */
-function vZik(){let h=Pn(`<div class="gold">Zikir ve Dua</div><div class="opts">${['Zikirmatik','Hazır Zikirler','Hazır Dualar','Dua Ekle','Kaydedilenler'].map(s=>P(s,U.zs===s,'zs')).join('')}</div>`,1);
-const Z=D.zikirs.find(z=>z.name===S.zikir)||D.zikirs[0],c=S.counts[Z.name]||0;
-if(U.zs==='Zikirmatik')h+=Pn(`<b>Zikir seç</b><div class="opts">${D.zikirs.map(z=>P(z.name,z.name===Z.name,'zk')).join('')}</div><div class="zt"><div class="mint sm">ŞU ANDA OKUDUĞUN ZİKİR</div><div class="ar" style="font-size:30px">${Z.arabic}</div><b style="font-size:19px">${esc(Z.name)}</b><div class="mint sm">${esc(Z.meaning)}</div></div><button class="counter" data-a="tap"><b id="cnt">${c}</b>Dokun ve Zikret</button><div class="c" id="goalt">Hedef: ${S.goal} · %${Math.min(100,Math.round(c/S.goal*100))}</div><div class="bar"><i id="bar" style="width:${Math.min(100,c/S.goal*100)}%"></i></div><div class="opts">${[33,99,100].map(n=>P(String(n),S.goal===n,'goal')).join('')}</div><div class="row">${B('Geri Al','undo',0,1)}${B('Sıfırla','reset',0,1)}</div>`+B(has('favZ',Z.name)?'★ Favoriden Çıkar':'☆ Zikri Kaydet','favz',Z.name,1),1);
-else if(U.zs==='Hazır Zikirler')h+=D.zikirs.map(z=>Pn(`<h3>${esc(z.name)}</h3><div class="ar">${z.arabic}</div><p>${esc(z.meaning)}</p>`+B('Zikirmatiğe Aktar','imp',z.name))).join('');
-else if(U.zs==='Hazır Dualar'){h+=Pn(`<div class="opts">${['Günlük','Korunma','Namaz','Peygamber','Tövbe','Kaydedilenler'].map(c=>P(c,U.duaCat===c,'dc')).join('')}</div>`,1);
-h+=D.duas.filter(d=>U.duaCat==='Kaydedilenler'?has('favD',d.name):d.cat===U.duaCat).map(d=>Pn(`<h3><button class="toggle" style="border:0;padding:0;font-weight:700;font-size:19px" data-a="duaopen" data-v="${esc(d.name)}">${esc(d.name)} <span>${U.duaOpen===d.name?'⌃':'⌄'}</span></button></h3>`+(U.duaOpen===d.name?`<div class="ar">${d.ar}</div><b>Okunuşu</b><p>${esc(d.pron)}</p><b>Anlamı</b><p>${esc(d.meaning)}</p>`+B(has('favD',d.name)?'Kaydı Kaldır':'Duayı Kaydet','favd',d.name):''))).join('');
-h+='<p class="sm mint">Hazır dua kataloğu aşamalı olarak doğrulanıyor. 49 dua henüz tamamlanmadı.</p>'}
-else if(U.zs==='Dua Ekle')h+=Pn(`<h3>${U.edit<0?'Kendi Duanı Ekle':'Duayı Düzenle'}</h3>`+[['name','Dua başlığı'],['ar','Arapça metin (isteğe bağlı)'],['pron','Okunuş (isteğe bağlı)'],['meaning','Anlamı / dua metni']].map(([k,l])=>`<label><b>${l}</b>${k==='name'?`<input data-f="${k}" placeholder="${l}" value="${esc(U.draft[k])}">`:`<textarea data-f="${k}" rows="${k==='meaning'?4:2}" placeholder="${l}">${esc(U.draft[k])}</textarea>`}</label>`).join('')+B(U.edit<0?'Duamı Kaydet':'Değişiklikleri Kaydet','savedua')+S.custom.map((d,i)=>`<div class="inner"><b>${esc(d.name)}</b><p>${esc(d.meaning)}</p><div class="row">${B('Düzenle','editdua',i,1)}${B('Sil','deldua',i,1)}</div></div>`).join(''));
-else h+=Pn(`<h3>Kaydedilenler</h3><b>Favori Zikirler</b>${S.favZ.map(z=>`<button class="toggle" data-a="imp" data-v="${esc(z)}">${esc(z)} →</button>`).join('')}<b>Kaydedilen Dualar</b>${S.favD.map(d=>`<button class="toggle" data-a="gotodua" data-v="${esc(d)}">${esc(d)} →</button>`).join('')}${!S.favZ.length&&!S.favD.length?'<p>Henüz kayıt yok.</p>':''}`);
-return h+'<div class="ad">Reklam alanı</div>'}
+function vZik(){const es=S.zikir==='Esmaül Hüsna',ei=S.esma||0,E=ESMA[ei],Z=es?{name:E[1],arabic:E[0],meaning:E[2]}:(D.zikirs.find(z=>z.name===S.zikir)||D.zikirs[0]),c=S.counts[es?'E:'+E[1]:Z.name]||0;
+return Pn(`<b>Zikir seç</b><div class="opts">${['Esmaül Hüsna'].concat(D.zikirs.map(z=>z.name)).map(n=>P(n,es?n==='Esmaül Hüsna':n===Z.name,'zk')).join('')}</div>`+(es?`<div id="el" class="elist">${ESMA.map((e,i)=>`<button class="er${i===ei?' on':''}" data-a="esma" data-v="${i}"><span class="en">${i+1}</span><span class="et"><b>${e[1]}</b><small>${e[2]}</small></span><span class="ea">${e[0]}</span></button>`).join('')}</div>`:'')+`<div class="zt"><div class="mint sm">ŞU ANDA OKUDUĞUN ZİKİR</div><div class="ar" style="font-size:30px">${Z.arabic}</div><b style="font-size:19px">${esc(Z.name)}</b><div class="mint sm">${esc(Z.meaning)}</div></div><button class="counter" data-a="tap"><b id="cnt">${c}</b>Dokun ve Zikret</button><div class="c" id="goalt">Hedef: ${S.goal} · %${Math.min(100,Math.round(c/S.goal*100))}</div><div class="bar"><i id="bar" style="width:${Math.min(100,c/S.goal*100)}%"></i></div><div class="opts">${[33,99,100].map(n=>P(String(n),S.goal===n,'goal')).join('')}</div><div class="row">${B('Geri Al','undo',0,1)}${B('Sıfırla','reset',0,1)}</div>`,1)+'<div class="ad">Reklam alanı</div>'}
 
 /* ---- Kur'an ---- */
 function sureList(){const q=ascii(U.query.toLowerCase()).trim();if(Q.status==='loading')return'<p>Yükleniyor…</p>';if(Q.status==='error')return`<p>Sure listesi yüklenemedi (internet bağlantısı gerekir).</p>${L('Resmî Diyanet Kur’an Portalı',D.sources.kuran)}`;
@@ -213,6 +309,19 @@ function playSound(k){if(k==='sessiz')return;try{AC=AC||new (window.AudioContext
 const VIB={kisa:[200],cift:[150,100,150],uzun:[700]};
 const buzz=k=>{if(k&&VIB[k]&&navigator.vibrate)navigator.vibrate(VIB[k])};
 function fire(title,body){toast(title+' — '+body);playSound(S.np.sound);buzz(S.np.vib);if('Notification' in window&&Notification.permission==='granted'){try{new Notification(title,{body})}catch(e){}}}
+const SOZ=[["Şüphesiz güçlükle beraber bir kolaylık vardır.", "İnşirâh 94:5"], ["Biliniz ki kalpler ancak Allah’ı anmakla huzur bulur.", "Ra‘d 13:28"], ["Allah hiç kimseye gücünün yettiğinden fazlasını yüklemez.", "Bakara 2:286"], ["Siz beni anın, ben de sizi anayım.", "Bakara 2:152"], ["Kim Allah’a güvenirse O, ona yeter.", "Talâk 65:3"], ["Allah’ın rahmetinden ümit kesmeyin.", "Zümer 39:53"], ["Lâ ilâhe illâ ente sübhâneke innî küntü minez-zâlimîn.", "Enbiyâ 21:87"], ["Hasbünallâhü ve ni‘mel-vekîl.", "Âl-i İmrân 3:173"], ["Rabbişrah lî sadrî ve yessir lî emrî.", "Tâhâ 20:25-26"], ["Rabbenâ âtinâ fid-dünyâ haseneten ve fil-âhireti haseneten ve kınâ azâben-nâr.", "Bakara 2:201"], ["Rabbi zidnî ilmâ.", "Tâhâ 20:114"], ["Lâ havle ve lâ kuvvete illâ billâh.", "Zikir"], ["Ameller ancak niyetlere göredir.", "Hadis-i şerif · Buhârî, Müslim"], ["Kolaylaştırın, zorlaştırmayın; müjdeleyin, nefret ettirmeyin.", "Hadis-i şerif · Buhârî, Müslim"], ["Sizin en hayırlınız, Kur’an’ı öğrenen ve öğretendir.", "Hadis-i şerif · Buhârî"], ["Temizlik imanın yarısıdır.", "Hadis-i şerif · Müslim"], ["Güzel söz sadakadır.", "Hadis-i şerif · Buhârî, Müslim"], ["Müslüman, diğer Müslümanların elinden ve dilinden emin olduğu kimsedir.", "Hadis-i şerif · Buhârî, Müslim"], ["Hiçbiriniz, kendisi için istediğini din kardeşi için de istemedikçe iman etmiş olmaz.", "Hadis-i şerif · Buhârî, Müslim"]];
+const slot=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/72e5);
+const soz=()=>SOZ[slot()%SOZ.length];
+const nextSoz=()=>{const d=new Date((slot()+1)*72e5+new Date().getTimezoneOffset()*60000);return pad(d.getHours())+':'+pad(d.getMinutes())};
+function wrapTxt(g,s,w){const o=[];let l='';s.split(' ').forEach(x=>{const n=l?l+' '+x:x;if(g.measureText(n).width>w&&l){o.push(l);l=x}else l=n});if(l)o.push(l);return o}
+function drawWall(cv,st){if(!cv)return;const dpr=window.devicePixelRatio||1;let W=Math.round(screen.width*dpr),H=Math.round(screen.height*dpr);if(H<W){const x=W;W=H;H=x}if(H>3000){W=Math.round(W*3000/H);H=3000}cv.width=W;cv.height=H;const g=cv.getContext('2d'),s=soz(),bl=st==='siyah';
+const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,bl?'#000':'#0b1f1a');bg.addColorStop(1,bl?'#0b0b0b':'#14463a');g.fillStyle=bg;g.fillRect(0,0,W,H);
+g.strokeStyle=bl?'rgba(255,255,255,.07)':'rgba(231,201,139,.11)';g.lineWidth=W*.004;for(let i=1;i<=6;i++){g.beginPath();g.arc(W,H*.62,W*(.16+i*.12),0,Math.PI*2);g.stroke()}
+const mx=W*.09,fs=W*.058;g.textAlign='left';g.textBaseline='alphabetic';g.fillStyle='#F4EFE1';g.font=`italic ${fs}px Georgia,'Times New Roman',serif`;
+const ln=wrapTxt(g,'“'+s[0]+'”',W*.82);let y=H*.44;ln.forEach(l=>{g.fillText(l,mx,y);y+=fs*1.45});
+g.fillStyle='#E7C98B';g.font=`${fs*.5}px system-ui,sans-serif`;g.fillText(s[1],mx,y+fs*.35);
+g.textAlign='center';g.fillStyle=bl?'rgba(255,255,255,.35)':'rgba(231,201,139,.55)';g.font=`700 ${W*.035}px system-ui,sans-serif`;if('letterSpacing' in g)g.letterSpacing=W*.012+'px';g.fillText('MİHRA',W/2,H*.82)}
+let WS=-1;
 const FIRED={};
 function tick2(){const d=new Date(),sec=d.getHours()*3600+d.getMinutes()*60+d.getSeconds(),day=d.toDateString();
 if(S.setup&&S.np.on&&T.t&&!T.demo)PR5.forEach(([a,b])=>{if(!S.np.list[a])return;const m=/(\d+):(\d+)/.exec(T.t[b]||'');if(!m)return;const tg=(+m[1])*3600+(+m[2])*60-S.np.before*60,k=day+a+S.np.before,hm=m[1].padStart(2,'0')+':'+m[2];if(sec>=tg&&sec<tg+60&&!FIRED[k]){FIRED[k]=1;fire('MİHRA · '+a,S.np.before?`${a} namazına ${S.np.before} dakika kaldı (${hm})`:`${a} vakti girdi (${hm})`)}});
@@ -228,25 +337,28 @@ Notification.requestPermission().then(p=>{if(p==='granted'){try{new Notification
 function vSet(){let b='';
 if(U.stab==='Konum')b=`<div class="sl">Konumun</div><p>⌖ ${esc(S.city)}${S.country?', '+esc(S.country):''} <span class="sm mint">(${S.auto?'otomatik konum':'elle seçildi'})</span></p>${U.loc==='loading'?'<p>Konum alınıyor…</p>':U.loc==='fail'?`<p class="sm" style="color:var(--gold)">${locErr()}</p>`:''}${B('📍 Konumumu otomatik bul','autoloc')}${B(U.manual?'Elle seçmeyi kapat':'Şehri elle seç','manual',0,1)}${U.manual?pickHTML():''}`;
 else if(U.stab==='Namaz Bildirimleri')b=chk('Namaz bildirimleri açık',S.np.on,'np_on')+`<div class="sl">Bildirilecek vakitler</div><div class="g2">${PR5.map(([a])=>chk(a,S.np.list[a],'np_pr',a)).join('')}</div><div class="sl">Bildirim sesi</div>`+[['melodi','Kısa melodi'],['klasik','Klasik bildirim'],['sessiz','Sessiz']].map(([k,l])=>rad(l,S.np.sound===k,'np_snd',k)).join('')+`<div class="sl">Titreşim</div>`+[['kapali','Kapalı'],['kisa','Kısa'],['cift','Çift'],['uzun','Uzun']].map(([k,l])=>rad(l,S.np.vib===k,'np_vib',k)).join('')+`<div class="sl">Hatırlatma</div><select id="before">${[0,1,5,10,15,20].map(m=>`<option value="${m}"${S.np.before===m?' selected':''}>${m?m+' dakika önce':'Tam vaktinde'}</option>`).join('')}</select>`+B('🔔 Bildirimi dene','ntest',0,1)+B('Bildirim iznini ver','notif',0,1)+`<p class="sm mint">Web sürümünde hatırlatmalar sayfa açıkken çalışır. Uygulama kapalıyken bildirim, gerçek iOS/Android uygulamasında olacak.</p>`;
+else if(U.stab==='Duvar Kağıdı')b=`<canvas id="wall" style="width:min(62vw,240px);height:auto;border-radius:22px;display:block;margin:6px auto;border:1px solid #355C4D"></canvas><p class="c sm mint">Söz her 2 saatte bir (çift saatlerde) değişir. Sonraki değişim: <b>${nextSoz()}</b></p><div class="opts">${P('Zümrüt',U.wst==='zumrut','wst','zumrut')}${P('Siyah',U.wst==='siyah','wst','siyah')}</div>`+B('📥 Duvar kağıdını kaydet / paylaş','wsave')+`<p class="sm mint">Web sürümü ana ekranı kendiliğinden değiştiremez: kaydedip duvar kağıdı olarak ayarlarsın. Kilit ekranındaki yazının 2 saatte bir kendiliğinden değişmesi için iPhone’da Scriptable widget’ı (kılavuzda) ya da gerçek uygulama kullanılır.</p>`;
 else b=DN.map(([k,l])=>chk(l,S.dn[k],'dn_tog',k)).join('')+`<div class="sl">Gönderim saati</div><select id="dtime">${['07:00','09:00','12:00','18:00','21:00'].map(h=>`<option${S.dn.time===h?' selected':''}>${h}</option>`).join('')}</select>`+B('🔔 Örnek bildirim gönder','dtest',0,1)+B('Bildirim iznini ver','notif',0,1)+`<p class="sm mint">Hadis ve ayet metinleri kısa anlam olarak verilir; yayın öncesi kaynaklarıyla doğrulanmalıdır.</p>`;
-return Pn(`<h3 style="margin:0">Ayarlar</h3><div class="opts">${['Konum','Namaz Bildirimleri','Günlük Bildirimler'].map(x=>P(x,U.stab===x,'stab')).join('')}</div>`+b+B('Ayarları Kapat','settings'),1)}
+return Pn(`<div class="opts">${['Konum','Namaz Bildirimleri','Günlük Bildirimler','Duvar Kağıdı'].map(x=>P(x,U.stab===x,'stab')).join('')}</div>`+b+B('Ayarları Kapat','settings'),1)}
 const views={'Vakitler':vVak,'Kıble':vKib,'Zikir':vZik,'Kur’an':vKur,'Öğren':vOgr};
 function R(){const y=scrollY;let h;
 if(U.stage===0)h=`<div class="welcome"><div class="logo">☾</div><div class="brandbig">MİHRA</div><b style="font-size:18px">Huzura açılan bir kapı.</b><p class="mint" style="margin-top:10px">Namaz vakitleri, kıble, zikir, Kur’an ve dinî bilgiler bir arada.</p><div style="height:24px"></div>${B('Başlayalım →','stage',1)}<span class="mint sm">Ücretsiz · Üyelik gerektirmez</span></div>`;
 else if(U.stage===1)h=Pn(`<div class="gold">İLK KURULUM · 1/2</div><h3 style="font-size:24px">Konumun</h3>`+(U.loc==='loading'?`<p>Konumun alınıyor… Tarayıcı izin isterse <b>İzin ver</b>'e dokun.</p>`:`<p class="mint sm">Namaz vakitleri ve kıble otomatik ayarlansın diye konum izni gerekir. İzin vermezsen şehrini aşağıdan arayarak seçebilirsin.</p>`+(U.loc==='fail'?`<p class="sm" style="color:var(--gold)">${locErr()}</p>`:'')+B('📍 Konumumu otomatik bul','autoloc')+pickHTML()),1);
 else if(U.stage===2)h=Pn(`<div class="gold">İLK KURULUM · 2/2</div><h3 style="font-size:24px">Bildirim tercihleri</h3>${togHTML()}${B('Bildirim iznini dene','notif',0,1)}<p class="mint sm">Tercihler kaydedilir. Gerçek bildirimler web’de sınırlıdır; telefon uygulamasında çalışacak.</p>${B('MİHRA\'yı Aç →','finish')}`,1);
-else h=`<div class="header"><div><div class="brand">MİHRA</div><span class="mint sm">⌖ ${esc(S.city)}${S.country?', '+esc(S.country):''}${T.demo?' · Önizleme':''}</span></div><button class="icon" data-a="settings" aria-label="Ayarlar" style="font-size:20px;width:52px;height:52px;border-radius:50%">${U.settings?'✕':'⚙'}</button></div>`+(U.settings?vSet():views[U.tab]());
-$('#app').innerHTML=h;const t=$('#tabs');t.style.display=U.stage===3?'block':'none';
+else h=`<div class="header"><div><div class="brand">MİHRA</div><span class="mint sm">⌖ ${esc(S.city)}${S.country?', '+esc(S.country):''}${T.demo?' · Önizleme':''}</span></div><button class="icon" data-a="settings" aria-label="Ayarlar" style="font-size:20px;width:52px;height:52px;border-radius:50%">${U.settings?'✕':'⚙'}</button></div>`+views[U.tab]();
+const el0=$('#el'),est=el0?el0.scrollTop:0;$('#app').innerHTML=h;const el1=$('#el');if(el1)el1.scrollTop=est;const sh=$('#sheet'),on=U.settings&&U.stage===3;if(on){const sst=sh.scrollTop;sh.innerHTML='<div class="shin"><div class="hd"><span class="brand" style="font-size:24px">Ayarlar</span><button class="icon" data-a="settings" aria-label="Kapat" style="font-size:20px;width:48px;height:48px;border-radius:50%">✕</button></div>'+vSet()+'</div>';sh.scrollTop=sst;if(U.stab==='Duvar Kağıdı'){WS=slot();drawWall($('#wall'),U.wst)}}sh.classList.toggle('open',on);const t=$('#tabs');t.style.display=U.stage===3?'block':'none';
 t.firstElementChild.innerHTML=[['Vakitler','🕒'],['Kıble','🧭'],['Zikir','📿'],['Kur’an','📖'],['Öğren','🎓']].map(([n,i])=>`<button class="${U.tab===n?'on':''}" data-a="tab" data-v="${n}"><i>${i}</i>${n}</button>`).join('');scrollTo(0,y)}
 
 document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,v=t.dataset.v;const go=top=>{R();if(top)scrollTo(0,0)};
-const Z=()=>S.zikir,cnt=()=>S.counts[Z()]||0;
+const Z=()=>S.zikir==='Esmaül Hüsna'?'E:'+ESMA[S.esma||0][1]:S.zikir,cnt=()=>S.counts[Z()]||0;
 switch(a){
 case 'stage':U.stage=+v;if(U.stage===1){locate();return}return go(1);
 case 'finish':S.setup=true;save();U.stage=3;loadTimes();if(!iosPerm)compass();return go(1);
 case 'settings':U.settings=!U.settings;return go(1);
 case 'tab':U.tab=v;U.settings=false;if(v==='Kıble'&&iosPerm&&!K.on&&K.st!=='denied')compass();if(v==='Kur’an')loadSurahs();return go(1);
 case 'stab':U.stab=v;return go();
+case 'wst':U.wst=v;return go();
+case 'wsave':{const cv=$('#wall');if(!cv)return;cv.toBlob(async b=>{const f=new File([b],'mihra-duvar-kagidi.png',{type:'image/png'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'MİHRA duvar kağıdı'});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;document.body.appendChild(a);a.click();a.remove();toast('Duvar kağıdı indirildi. Galeri/Fotoğraflar’dan duvar kağıdı yap.')})();return}
 case 'np_on':S.np.on=!S.np.on;save();return go();
 case 'np_pr':S.np.list[v]=!S.np.list[v];save();return go();
 case 'np_snd':S.np.sound=v;save();playSound(v);return go();
@@ -275,6 +387,7 @@ case 'simL':K.heading=((K.heading||0)+345)%360;checkAlign();return go();
 case 'simR':K.heading=((K.heading||0)+15)%360;checkAlign();return go();
 case 'zs':U.zs=v;return go();
 case 'zk':S.zikir=v;save();return go();
+case 'esma':S.esma=+v;save();return go();
 case 'tap':{const n=cnt()+1;S.counts[Z()]=n;save();if(navigator.vibrate)navigator.vibrate(n===S.goal?[0,200,100,200]:15);$('#cnt').textContent=n;$('#bar').style.width=Math.min(100,n/S.goal*100)+'%';$('#goalt').textContent=`Hedef: ${S.goal} · %${Math.min(100,Math.round(n/S.goal*100))}`;return}
 case 'undo':S.counts[Z()]=Math.max(0,cnt()-1);save();return go();
 case 'reset':if(confirm('Bu zikrin sayacı sıfırlansın mı?')){S.counts[Z()]=0;save();go()}return;
@@ -303,6 +416,6 @@ case 'lsave':tog('savedLessons',v);return go();
 case 'ldone':tog('completed',v);return go();
 }});
 document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.f){U.draft[t.dataset.f]=t.value}else if(t.id==='before'){S.np.before=+t.value;save()}else if(t.id==='dtime'){S.dn.time=t.value;save()}else if(t.id==='cs'){U.pc=null;U.cityRes=[];U.cityMsg='';$('#cl').innerHTML=countryList(t.value);const c=$('#cts');if(c){c.disabled=true;c.value='';$('#ctl').innerHTML=''}}else if(t.id==='cts'){citySearch(t.value)}else if(t.id==='sq'){U.query=t.value;$('#sl').innerHTML=sureList()}});
-setInterval(()=>{try{tick2()}catch(e){}const n=nextP(),c=$('#cd');if(n&&c){c.textContent=n.left;$('#cdn').textContent=n.time+' · Namaza kalan süre'}},1000);
+setInterval(()=>{try{tick2();if(U.settings&&U.stab==='Duvar Kağıdı'&&WS!==slot()){WS=slot();drawWall($('#wall'),U.wst);const p=document.querySelector('#sheet .c.sm b');if(p)p.textContent=nextSoz()}}catch(e){}const n=nextP(),c=$('#cd');if(n&&c){c.textContent=n.left;$('#cdn').textContent=n.time+' · Namaza kalan süre'}},1000);
 R();if(U.stage===3){loadTimes();silentLoc();if(!iosPerm)compass()}
 </script></body></html>
