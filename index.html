@@ -42,6 +42,7 @@ a{color:#1A7458}.dark a{color:var(--gold)}
 .juz{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.juz button{height:42px;border-radius:9px;background:var(--card2);color:var(--cream);font-weight:700}.juz button.on{background:var(--gold);color:var(--bg)}
 .sure{border-bottom:.5px solid #C4D1C7;padding:8px 0}.sure>button{background:none;color:inherit;text-align:left;width:100%;padding:0}
 .ayah{direction:rtl;text-align:right;color:var(--card);line-height:2}
+.plist button{display:block;width:100%;text-align:left;background:var(--card2);color:var(--cream);padding:11px;border-radius:9px;margin-top:5px;font-size:15px}
 #tabs{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid #355C4D;padding-bottom:env(safe-area-inset-bottom,0px)}
 #tabs div{max-width:560px;margin:auto;display:flex;justify-content:space-around;padding:8px 0}
 #tabs button{background:none;color:var(--mint);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:4px 8px}#tabs button i{font-style:normal;font-size:21px}
@@ -62,13 +63,14 @@ const prayerData=[['Sabah','2 sünnet · 2 farz'],['Öğle','4 ilk sünnet · 4 
 const starts=[1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
 const DEMO={Fajr:'05:12',Sunrise:'06:41',Dhuhr:'12:30',Asr:'15:28',Maghrib:'18:05',Isha:'19:28'};
 const NAMES={ayet:'Günün Ayeti',esma:'Esmaül Hüsna',dua:'Günün Duası'};
-const init={setup:false,country:'Türkiye',city:'İstanbul',notifications:true,daily:{ayet:true,esma:true,dua:false},counts:{},favZ:[],favD:[],custom:[],page:1,bookmarks:[],savedLessons:[],completed:[],lastSurah:0,goal:33,zikir:'Sübhanallah'};
+const init={setup:false,country:'Türkiye',city:'İstanbul',notifications:true,daily:{ayet:true,esma:true,dua:false},counts:{},favZ:[],favD:[],custom:[],page:1,bookmarks:[],savedLessons:[],completed:[],lastSurah:0,goal:33,zikir:'Sübhanallah',lat:null,lon:null,cc:'',auto:false};
 let S=Object.assign({},init);try{S=Object.assign(S,JSON.parse(localStorage.getItem('mihra-v1')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('mihra-v1',JSON.stringify(S))}catch(e){}};
 const blank=()=>({name:'',cat:'Kişisel',ar:'',pron:'',meaning:''});
-const U={stage:S.setup?3:0,tab:'Vakitler',settings:false,zs:'Zikirmatik',duaCat:'Günlük',duaOpen:'',edit:-1,draft:blank(),lcat:'İbadet',lesson:'',step:0,prayer:'Öğle',guide:false,qv:'Sureler',query:'',openS:0,fs:22};
+const U={stage:S.setup?3:0,tab:'Vakitler',settings:false,zs:'Zikirmatik',duaCat:'Günlük',duaOpen:'',edit:-1,draft:blank(),lcat:'İbadet',lesson:'',step:0,prayer:'Öğle',guide:false,qv:'Sureler',query:'',openS:0,fs:22,loc:'idle',locErr:'',manual:false,pc:null,cityRes:[],cityMsg:''};
 const T={status:'idle',t:null,lat:null,lon:null,demo:false,gps:null};
-const K={heading:null,demo:false,sim:0,msg:''};
+const K={heading:null,st:'idle',on:false,msg:''};
+const iosPerm=typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function';
 const Q={surahs:[],status:'idle',cache:{},loading:false};
 let toastT;const toast=m=>{const e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>e.style.display='none',3800)};
 const P=(l,on,a,v)=>`<button class="pill${on?' on':''}" data-a="${a}" data-v="${esc(v==null?l:v)}">${esc(l)}</button>`;
@@ -80,16 +82,24 @@ function tog(f,x){S[f]=has(f,x)?S[f].filter(y=>y!==x):S[f].concat([x]);save()}
 const juzOf=n=>starts.filter(x=>x<=n).length;
 
 /* ---- Vakitler ---- */
-async function loadTimes(){T.status='loading';const day=new Date().toDateString();const key='mihra-t-'+(T.gps?T.gps.lat.toFixed(2)+','+T.gps.lon.toFixed(2):S.country+S.city)+day;const m=S.country==='Türkiye'?13:3;
-try{const u=T.gps?`https://api.aladhan.com/v1/timings?latitude=${T.gps.lat}&longitude=${T.gps.lon}&method=${m}`:`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(ascii(S.city))}&country=${encodeURIComponent(EN[S.country]||S.country)}&method=${m}`;
+async function loadTimes(){T.status='loading';const day=new Date().toDateString();const has=S.lat!=null&&S.lon!=null;const key='mihra-t-'+(has?(+S.lat).toFixed(2)+','+(+S.lon).toFixed(2):S.country+S.city)+day;const m=(S.cc?S.cc==='TR':S.country==='Türkiye')?13:3;
+try{const u=has?`https://api.aladhan.com/v1/timings?latitude=${S.lat}&longitude=${S.lon}&method=${m}`:`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(ascii(S.city))}&country=${encodeURIComponent(EN[S.country]||S.country)}&method=${m}`;
 const j=await (await fetch(u)).json();if(!j.data||!j.data.timings)throw 0;T.t=j.data.timings;T.lat=j.data.meta&&j.data.meta.latitude;T.lon=j.data.meta&&j.data.meta.longitude;T.demo=false;T.status='ok';try{localStorage.setItem(key,JSON.stringify([T.t,T.lat,T.lon]))}catch(e){}}
 catch(e){let c=null;try{c=JSON.parse(localStorage.getItem(key))}catch(x){}if(c){T.t=c[0];T.lat=c[1];T.lon=c[2];T.status='cache';T.demo=false}else{T.t=DEMO;T.demo=true;T.status='error'}}
 if(U.stage===3&&(U.tab==='Vakitler'||U.tab==='Kıble'))R()}
 function nextP(){if(!T.t)return null;const n=new Date(),s=n.getHours()*3600+n.getMinutes()*60+n.getSeconds();const l=PR.map(([a,b])=>{const m=/(\d+):(\d+)/.exec(T.t[b]||'');return m?{name:a,time:m[1].padStart(2,'0')+':'+m[2],sec:(+m[1])*3600+(+m[2])*60}:null}).filter(Boolean);let x=l.find(i=>i.sec>s),d;if(x)d=x.sec-s;else{x=l[0];d=86400-s+x.sec}return {name:x.name,time:x.time,left:pad(Math.floor(d/3600))+':'+pad(Math.floor(d%3600/60))+':'+pad(d%60)}}
-function gps(){if(!navigator.geolocation||!window.isSecureContext){toast('Konum bu tarayıcıda/bağlantıda kullanılamıyor (HTTPS gerekir). Şehir seçerek devam edebilirsin.');return}
-navigator.geolocation.getCurrentPosition(p=>{T.gps={lat:p.coords.latitude,lon:p.coords.longitude};toast('Konum alındı.');loadTimes()},()=>toast('Konum izni verilmedi veya alınamadı. Şehir seçebilirsin.'),{timeout:12000})}
+const getPos=()=>new Promise((res,rej)=>{if(!navigator.geolocation||!window.isSecureContext)return rej('unsupported');navigator.geolocation.getCurrentPosition(p=>res(p.coords),e=>rej(e.code===1?'denied':'error'),{timeout:15000,maximumAge:60000})});
+async function geo(la,lo){try{const j=await (await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${la}&longitude=${lo}&localityLanguage=tr`)).json();const cc=j.countryCode||'';const c=cc==='TR'?(j.principalSubdivision||j.city):(j.city||j.locality||j.principalSubdivision);return {country:j.countryName||'',cc,city:(c||'Konumum').replace(/ (İli|Province)$/,'')}}catch(e){return {country:'',cc:'',city:'Konumum'}}}
+async function locate(){U.loc='loading';R();try{const c=await getPos();const g=await geo(c.latitude,c.longitude);Object.assign(S,{lat:c.latitude,lon:c.longitude,auto:true,country:g.country,city:g.city,cc:g.cc});save();U.loc='ok';U.manual=false;if(U.stage===1)U.stage=2;toast('Konum bulundu: '+S.city+(S.country?', '+S.country:''));loadTimes();R()}catch(e){U.loc='fail';U.locErr=String(e);R()}}
+async function silentLoc(){try{if(!S.auto||!navigator.permissions)return;const p=await navigator.permissions.query({name:'geolocation'});if(p.state!=='granted')return;const c=await getPos();const moved=S.lat==null||Math.abs(c.latitude-S.lat)+Math.abs(c.longitude-S.lon)>0.05;if(!moved)return;const g=await geo(c.latitude,c.longitude);Object.assign(S,{lat:c.latitude,lon:c.longitude,country:g.country,city:g.city,cc:g.cc});save();loadTimes()}catch(e){}}
+const REG=(()=>{try{const dn=new Intl.DisplayNames(['tr'],{type:'region'}),A='ABCDEFGHIJKLMNOPQRSTUVWXYZ',o=[];for(const a of A)for(const b of A){const c=a+b;let n;try{n=dn.of(c)}catch(e){continue}if(n&&n!==c&&!/^(EU|UN|EZ|XA|XB|AC|CP|DG|EA|IC|TA|QO|ZZ)$/.test(c))o.push([c,n])}return o.sort((x,y)=>x[1].localeCompare(y[1],'tr'))}catch(e){return []}})();
+const countryList=q=>{q=ascii(q.toLowerCase()).trim();if(!q)return'';return REG.filter(r=>ascii(r[1].toLowerCase()).includes(q)).slice(0,8).map(r=>`<button data-a="pcountry" data-v="${r[0]}">${esc(r[1])}</button>`).join('')||'<p class="sm">Ülke bulunamadı.</p>'};
+const cityList=()=>U.cityRes.length?U.cityRes.map((r,i)=>`<button data-a="pcity" data-v="${i}">${esc(r.name)}${r.admin1?' · '+esc(r.admin1):''}</button>`).join(''):(U.cityMsg?`<p class="sm">${esc(U.cityMsg)}</p>`:'');
+let cT;function citySearch(q){clearTimeout(cT);q=q.trim();if(q.length<2||!U.pc){U.cityRes=[];U.cityMsg='';$('#ctl').innerHTML='';return}cT=setTimeout(async()=>{try{const j=await (await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=10&language=tr&format=json&countryCode=${U.pc.cc}`)).json();U.cityRes=j.results||[];U.cityMsg=U.cityRes.length?'':'Şehir bulunamadı.'}catch(e){U.cityRes=[];U.cityMsg='Arama yapılamadı. İnternet bağlantını kontrol et.'}const e=$('#ctl');if(e)e.innerHTML=cityList()},350)}
+const pickHTML=()=>`<b>Ülke</b><input id="cs" placeholder="Ülke ara..." value="${esc(U.pc?U.pc.name:'')}" autocomplete="off"><div id="cl" class="plist"></div><b>Şehir</b><input id="cts" placeholder="${U.pc?'Şehir ara (en az 2 harf)...':'Önce ülke seç'}" ${U.pc?'':'disabled'} autocomplete="off"><div id="ctl" class="plist">${cityList()}</div>`;
+const locErr=()=>U.locErr==='denied'?'Konum izni verilmedi. Tarayıcı ayarından izin verebilir ya da şehrini elle arayabilirsin.':'Konum alınamadı (HTTPS ve açık konum servisi gerekir). Şehrini elle arayabilirsin.';
 function vVak(){const n=nextP();
-return Pn(`<div class="c"><div class="mint">☪ SIRADAKİ NAMAZ</div><div class="gl" id="cdn">${n?esc(n.name+' · '+n.time):(T.status==='loading'?'Vakitler yükleniyor…':'Vakit bekleniyor')}</div><div class="big" id="cd">${n?n.left:'--:--:--'}</div><div class="mint sm">vaktine kalan süre</div></div>`+B('↻ Vakitleri yenile','reload',0,1)+B('⌖ Konumumu kullan','gps',0,1)+
+return Pn(`<div class="c"><div class="mint">☪ SIRADAKİ NAMAZ</div><div class="gl" id="cdn">${n?esc(n.name+' · '+n.time):(T.status==='loading'?'Vakitler yükleniyor…':'Vakit bekleniyor')}</div><div class="big" id="cd">${n?n.left:'--:--:--'}</div><div class="mint sm">vaktine kalan süre</div></div>`+B('↻ Vakitleri yenile','reload',0,1)+
 `<div class="opts">${prayerData.map(p=>P(p[0],U.prayer===p[0],'prayer')).join('')}</div><div class="c"><div class="gl">${U.prayer}</div><div class="sm">${esc(prayerData.find(p=>p[0]===U.prayer)[1])}</div></div>`+B(U.guide?'Rehberi Kapat':'Nasıl Kılınır?','guide')+
 (U.guide?`<div class="inner"><b>${U.prayer} Namazı</b><p>Bu bölümde rekât sıralaması, kıraat ve oturuşların eksiksiz Diyanet doğrulaması yapılmadan adım adım kesin uygulama gösterilmiyor.</p>${L('Diyanet Namaz Portalı',D.sources.namaz)}</div>`:''),1)+
 Pn(`<h3>Günün Sözü</h3><div class="ar">فَإِنَّ مَعَ الْعُسْرِ يُسْرًا</div><p class="c">Şüphesiz güçlükle beraber bir kolaylık vardır.</p><p class="c sm">İnşirâh 94:5</p>`)+
@@ -97,15 +107,15 @@ Pn(`<div class="gold">Esmaül Hüsna</div><div class="gl c" style="font-size:32p
 Pn(`<h3>Namaz Vakitleri</h3>`+(T.t?PR.map(([a,b])=>`<div class="toggle${n&&n.name===a?' hl':''}" style="cursor:default"><span>${a}</span><b>${esc((T.t[b]||'--:--').slice(0,5))}</b></div>`).join('')+`<p class="sm">${T.demo?'⚠ DEMO: İnternet/servis yok; bunlar örnek saatlerdir, ibadet vakti olarak kullanma. ':''}${T.status==='cache'?'Çevrimdışı: son kaydedilen vakitler. ':''}${T.demo?'':'Aladhan verisi (Türkiye için Diyanet yöntemi); kesin vakit için Diyanet ile karşılaştır. '}Saatler cihaz saat dilimine göre karşılaştırılır.</p>`:'<p>Vakitler yükleniyor…</p>')+L('Diyanet resmî namaz vakitleri',D.sources.vakit))+'<div class="ad">Reklam alanı</div>'}
 
 /* ---- Kıble ---- */
-function bearing(){const la=T.gps?T.gps.lat:(T.lat!=null?+T.lat:null),lo=T.gps?T.gps.lon:(T.lon!=null?+T.lon:null);if(la==null||lo==null||isNaN(la))return null;const r=Math.PI/180,k=21.4225*r,p=la*r,d=(39.8262-lo)*r;return (Math.atan2(Math.sin(d)*Math.cos(k),Math.cos(p)*Math.sin(k)-Math.sin(p)*Math.cos(k)*Math.cos(d))/r+360)%360}
+function bearing(){const la=S.lat!=null?+S.lat:(T.lat!=null?+T.lat:null),lo=S.lon!=null?+S.lon:(T.lon!=null?+T.lon:null);if(la==null||lo==null||isNaN(la))return null;const r=Math.PI/180,k=21.4225*r,p=la*r,d=(39.8262-lo)*r;return (Math.atan2(Math.sin(d)*Math.cos(k),Math.cos(p)*Math.sin(k)-Math.sin(p)*Math.cos(k)*Math.cos(d))/r+360)%360}
 function rot(){const b=bearing();return b==null?0:(K.heading==null?b:(b-K.heading+360)%360)}
 function updArrow(){const a=$('#arrow');if(a)a.style.transform=`rotate(${rot()}deg)`;const h=$('#hd');if(h&&K.heading!=null)h.textContent='Cihaz yönü: '+Math.round(K.heading)+'°'}
-async function compass(){if(!window.isSecureContext||!('DeviceOrientationEvent' in window)){K.demo=true;K.msg='Pusula sensörü bu tarayıcıda/bağlantıda kullanılamıyor (HTTPS ve sensörlü cihaz gerekir). Aşağıdaki demo ile yön simüle edilir.';R();return}
-try{if(DeviceOrientationEvent.requestPermission){const r=await DeviceOrientationEvent.requestPermission();if(r!=='granted'){K.msg='Pusula izni verilmedi.';R();return}}}catch(e){}
-let got=false;const h=e=>{let v=null;if(typeof e.webkitCompassHeading==='number')v=e.webkitCompassHeading;else if(e.absolute&&e.alpha!=null)v=(360-e.alpha)%360;if(v!=null){got=true;K.heading=v;K.demo=false;updArrow()}};
-addEventListener('deviceorientationabsolute',h,true);addEventListener('deviceorientation',h,true);K.msg='Pusula açılıyor…';R();
-setTimeout(()=>{if(!got){K.demo=true;K.msg='Bu cihaz pusula verisi vermedi. Demo modu: ok kıble açısını gösterir, ↺ ↻ ile yönü simüle et.';R()}},1800)}
-function vKib(){const b=bearing();return Pn(`<div class="gold">Kıble Pusulası</div><div class="compass"><span style="top:8px">${K.heading==null?'K':'▲'}</span><svg id="arrow" viewBox="0 0 24 24" width="92" height="92" style="transform:rotate(${rot()}deg)"><path d="M12 2 20 21 12 17 4 21Z" fill="#E7C98B"/></svg><span class="s">${K.heading==null?'G':''}</span></div><div class="gl c">${b==null?'—':Math.round(b)+'°'}</div><p class="mint sm c" id="hd">${b==null?'Önce Vakitler sekmesinde şehir/konum seç; açı o zaman hesaplanır.':'Kuzeyden saat yönünde kıble açısı ('+(T.gps?'GPS':esc(S.city))+')'}</p>`+B('📍 Konumumla hesapla','gps')+B(K.heading==null?'Pusulayı etkinleştir':'Pusula açık ✓','compass',0,1)+(K.demo?`<div class="row">${B('↺','simL',0,1)}${B('↻','simR',0,1)}</div>`:'')+`<p class="mint sm">${esc(K.msg||'Pusula için HTTPS bağlantı, konum izni ve sensörlü cihaz gerekir. Desteklenmezse demo gösterilir. Metal ve manyetik kılıflardan uzak tut.')}</p>`,1)}
+async function compass(){if(K.on)return;if(!window.isSecureContext||!('DeviceOrientationEvent' in window)){K.st='demo';K.msg='Bu tarayıcı/bağlantı pusula sensörü vermiyor (HTTPS ve sensörlü cihaz gerekir). Demo modu: ok kıble açısını gösterir, ↺ ↻ ile yönü simüle et.';return}
+if(iosPerm){try{const r=await DeviceOrientationEvent.requestPermission();if(r!=='granted'){K.st='denied';K.msg='Pusula izni verilmedi. iPhone: Ayarlar → Safari → Hareket ve Yönelim Erişimi.';if(U.tab==='Kıble')R();return}}catch(e){K.st='need';if(U.tab==='Kıble')R();return}}
+K.on=true;K.st='wait';let got=false;const h=e=>{let v=null;if(typeof e.webkitCompassHeading==='number')v=e.webkitCompassHeading;else if(e.absolute&&e.alpha!=null)v=(360-e.alpha)%360;if(v!=null){if(!got&&K.st!=='ok'){K.st='ok';got=true;if(U.tab==='Kıble'&&U.stage===3)R()}K.heading=v;updArrow()}};
+addEventListener('deviceorientationabsolute',h,true);addEventListener('deviceorientation',h,true);
+setTimeout(()=>{if(K.heading==null){K.st='demo';K.on=false;K.msg='Bu cihaz pusula verisi vermedi. Demo modu: ok kıble açısını gösterir, ↺ ↻ ile yönü simüle et.';if(U.tab==='Kıble'&&U.stage===3)R()}},2500)}
+function vKib(){const b=bearing();return Pn(`<div class="gold">Kıble Pusulası</div><div class="compass"><span style="top:8px">${K.heading==null?'K':'▲'}</span><svg id="arrow" viewBox="0 0 24 24" width="92" height="92" style="transform:rotate(${rot()}deg)"><path d="M12 2 20 21 12 17 4 21Z" fill="#E7C98B"/></svg><span class="s">${K.heading==null?'G':''}</span></div><div class="gl c">${b==null?'—':Math.round(b)+'°'}</div><p class="mint sm c" id="hd">${b==null?'Konum bulunamadı. Ayarlar’dan konumunu güncelle ya da şehrini seç.':'Kuzeyden saat yönünde kıble açısı · '+esc(S.city)}</p>`+(K.st==='need'||K.st==='denied'?B('Pusulayı aç','compass'):'')+(K.st==='demo'?`<div class="row">${B('↺','simL',0,1)}${B('↻','simR',0,1)}</div>`:'')+`<p class="mint sm">${esc(K.st==='ok'?'Pusula otomatik çalışıyor. Telefonu düz tut; metal ve manyetik kılıflardan uzak tut.':K.st==='wait'?'Pusula verisi bekleniyor…':K.msg||'Pusula otomatik başlatılır.')}</p>`,1)}
 
 /* ---- Zikir ---- */
 function vZik(){let h=Pn(`<div class="gold">Zikir ve Dua</div><div class="opts">${['Zikirmatik','Hazır Zikirler','Hazır Dualar','Dua Ekle','Kaydedilenler'].map(s=>P(s,U.zs===s,'zs')).join('')}</div>`,1);
@@ -134,35 +144,36 @@ h+=D.lessons.filter(l=>U.lcat==='Kaydedilenler'?has('savedLessons',l.name):l.cat
 return h+Pn(`<p class="sm">Dinî anlatımlar Hanefî örnekleriyle hazırlanmış çalışma içeriğidir. Yayımdan önce Diyanet kaynaklarıyla editoryal kontrol gerektirir.</p>${L('Diyanet Namaz Portalı',D.sources.namaz)}`)}
 
 /* ---- Kurulum, ayarlar, kabuk ---- */
-const locHTML=()=>`<b>Ülke</b><div class="opts">${Object.keys(D.countries).map(c=>P(c,S.country===c,'country')).join('')}</div><b>Şehir</b><div class="opts">${D.countries[S.country].map(c=>P(c,S.city===c,'city')).join('')}</div>`;
+const locHTML_old=()=>`<b>Ülke</b><div class="opts">${Object.keys(D.countries).map(c=>P(c,S.country===c,'country')).join('')}</div><b>Şehir</b><div class="opts">${D.countries[S.country].map(c=>P(c,S.city===c,'city')).join('')}</div>`;
 const togHTML=()=>[['notifications','Namaz bildirimleri']].concat(Object.keys(S.daily).map(k=>[k,NAMES[k]])).map(([k,n])=>`<button class="toggle" data-a="tog" data-v="${k}"><span>${n}</span><span style="color:var(--gold);font-size:22px">${(k==='notifications'?S.notifications:S.daily[k])?'☑':'☐'}</span></button>`).join('');
 function notif(){if(!('Notification' in window)){toast('Bu tarayıcı bildirimleri desteklemiyor (iPhone Safari için uygulamayı Ana Ekrana ekle). Demo: bildirimler gerçek uygulamada çalışacak.');return}
 Notification.requestPermission().then(p=>{if(p==='granted'){try{new Notification('MİHRA',{body:'Test bildirimi: Sıradaki namaz vaktinde haber verilecek.'})}catch(e){toast('Bildirim izni var; bu cihaz sayfa bildirimini göstermiyor.')}}else toast('Bildirim izni verilmedi.')})}
 const views={'Vakitler':vVak,'Kıble':vKib,'Zikir':vZik,'Kur’an':vKur,'Öğren':vOgr};
 function R(){const y=scrollY;let h;
 if(U.stage===0)h=`<div class="welcome"><div class="logo">☾</div><div class="brandbig">MİHRA</div><b style="font-size:18px">Huzura açılan bir kapı.</b><p class="mint" style="margin-top:10px">Namaz vakitleri, kıble, zikir, Kur’an ve dinî bilgiler bir arada.</p><div style="height:24px"></div>${B('Başlayalım →','stage',1)}<span class="mint sm">Ücretsiz · Üyelik gerektirmez</span></div>`;
-else if(U.stage===1)h=Pn(`<div class="gold">İLK KURULUM · 1/2</div><h3 style="font-size:24px">Ülke ve şehir seç</h3><p class="mint sm">Namaz vakitleri ve kıble için konum tercihini belirle.</p>${locHTML()}<p class="mint sm">Şehir listesi ilk sürümde sınırlıdır; Diyanet konum eşleştirmesi henüz yapılmadı.</p>${B('Devam Et →','stage',2)}`,1);
+else if(U.stage===1)h=Pn(`<div class="gold">İLK KURULUM · 1/2</div><h3 style="font-size:24px">Konumun</h3>`+(U.loc==='loading'?`<p>Konumun alınıyor… Tarayıcı izin isterse <b>İzin ver</b>'e dokun.</p>`:`<p class="mint sm">Namaz vakitleri ve kıble otomatik ayarlansın diye konum izni gerekir. İzin vermezsen şehrini aşağıdan arayarak seçebilirsin.</p>`+(U.loc==='fail'?`<p class="sm" style="color:var(--gold)">${locErr()}</p>`:'')+B('📍 Konumumu otomatik bul','autoloc')+pickHTML()),1);
 else if(U.stage===2)h=Pn(`<div class="gold">İLK KURULUM · 2/2</div><h3 style="font-size:24px">Bildirim tercihleri</h3>${togHTML()}${B('Bildirim iznini dene','notif',0,1)}<p class="mint sm">Tercihler kaydedilir. Gerçek bildirimler web’de sınırlıdır; telefon uygulamasında çalışacak.</p>${B('MİHRA\'yı Aç →','finish')}`,1);
-else h=`<div class="header"><div><div class="brand">MİHRA</div><span class="mint sm">⌖ ${esc(S.city)}, ${esc(S.country)}</span></div><button class="icon" data-a="settings">${U.settings?'✕':'⚙ Ayarlar'}</button></div>`+(U.settings?Pn(`<h3>Ayarlar</h3>${locHTML()}${togHTML()}${B('Bildirim iznini dene','notif',0,1)}${B('Ayarları Kapat','settings')}`):views[U.tab]());
+else h=`<div class="header"><div><div class="brand">MİHRA</div><span class="mint sm">⌖ ${esc(S.city)}${S.country?', '+esc(S.country):''}</span></div><button class="icon" data-a="settings">${U.settings?'✕':'⚙ Ayarlar'}</button></div>`+(U.settings?Pn(`<h3>Ayarlar</h3><b>Konum</b><p>⌖ ${esc(S.city)}${S.country?', '+esc(S.country):''} <span class="sm">(${S.auto?'otomatik konum':'elle seçildi'})</span></p>${U.loc==='loading'?'<p>Konum alınıyor…</p>':U.loc==='fail'?`<p class="sm">${locErr()}</p>`:''}${B('📍 Konumumu otomatik bul','autoloc')}${B(U.manual?'Elle seçmeyi kapat':'Şehri elle seç','manual',0,1)}${U.manual?pickHTML():''}<b>Bildirimler</b>${togHTML()}${B('Bildirim iznini dene','notif',0,1)}${B('Ayarları Kapat','settings')}`):views[U.tab]());
 $('#app').innerHTML=h;const t=$('#tabs');t.style.display=U.stage===3?'block':'none';
 t.firstElementChild.innerHTML=[['Vakitler','🕒'],['Kıble','🧭'],['Zikir','📿'],['Kur’an','📖'],['Öğren','🎓']].map(([n,i])=>`<button class="${U.tab===n?'on':''}" data-a="tab" data-v="${n}"><i>${i}</i>${n}</button>`).join('');scrollTo(0,y)}
 
 document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,v=t.dataset.v;const go=top=>{R();if(top)scrollTo(0,0)};
 const Z=()=>S.zikir,cnt=()=>S.counts[Z()]||0;
 switch(a){
-case 'stage':U.stage=+v;return go(1);
-case 'finish':S.setup=true;save();U.stage=3;loadTimes();return go(1);
+case 'stage':U.stage=+v;if(U.stage===1){locate();return}return go(1);
+case 'finish':S.setup=true;save();U.stage=3;loadTimes();if(!iosPerm)compass();return go(1);
 case 'settings':U.settings=!U.settings;return go(1);
-case 'tab':U.tab=v;U.settings=false;if(v==='Kur’an')loadSurahs();return go(1);
-case 'country':S.country=v;S.city=D.countries[v][0];save();T.gps=null;if(U.stage===3)loadTimes();return go();
-case 'city':S.city=v;save();T.gps=null;if(U.stage===3)loadTimes();return go();
+case 'tab':U.tab=v;U.settings=false;if(v==='Kıble'&&iosPerm&&!K.on&&K.st!=='denied')compass();if(v==='Kur’an')loadSurahs();return go(1);
+case 'autoloc':locate();return;
+case 'manual':U.manual=!U.manual;return go();
+case 'pcountry':{const r=REG.find(x=>x[0]===v);U.pc={cc:v,name:r?r[1]:v};U.cityRes=[];U.cityMsg='';R();const c=$('#cts');if(c)c.focus();return}
+case 'pcity':{const r=U.cityRes[+v];if(!r)return;Object.assign(S,{country:U.pc.name,cc:U.pc.cc,city:r.name,lat:r.latitude,lon:r.longitude,auto:false});save();U.manual=false;U.cityRes=[];U.pc=null;U.loc='idle';if(U.stage===1)U.stage=2;toast('Konum ayarlandı: '+S.city+', '+S.country);loadTimes();return go(1)}
 case 'tog':if(v==='notifications')S.notifications=!S.notifications;else S.daily[v]=!S.daily[v];save();return go();
 case 'notif':return notif();
 case 'reload':loadTimes();return go();
-case 'gps':return gps();
 case 'prayer':U.prayer=v;U.guide=false;return go();
 case 'guide':U.guide=!U.guide;return go();
-case 'compass':return compass();
+case 'compass':K.on=false;K.st='idle';compass().then(()=>{if(U.tab==='Kıble')R()});return;
 case 'simL':K.heading=((K.heading||0)+345)%360;return go();
 case 'simR':K.heading=((K.heading||0)+15)%360;return go();
 case 'zs':U.zs=v;return go();
@@ -194,7 +205,7 @@ case 'lstep':{const l=D.lessons.find(x=>x.name===U.lesson);U.step=Math.max(0,Mat
 case 'lsave':tog('savedLessons',v);return go();
 case 'ldone':tog('completed',v);return go();
 }});
-document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.f){U.draft[t.dataset.f]=t.value}else if(t.id==='sq'){U.query=t.value;$('#sl').innerHTML=sureList()}});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.f){U.draft[t.dataset.f]=t.value}else if(t.id==='cs'){U.pc=null;U.cityRes=[];U.cityMsg='';$('#cl').innerHTML=countryList(t.value);const c=$('#cts');if(c){c.disabled=true;c.value='';$('#ctl').innerHTML=''}}else if(t.id==='cts'){citySearch(t.value)}else if(t.id==='sq'){U.query=t.value;$('#sl').innerHTML=sureList()}});
 setInterval(()=>{const n=nextP(),c=$('#cd');if(n&&c){c.textContent=n.left;$('#cdn').textContent=n.name+' · '+n.time}},1000);
-R();if(U.stage===3)loadTimes();
+R();if(U.stage===3){loadTimes();silentLoc();if(!iosPerm)compass()}
 </script></body></html>
