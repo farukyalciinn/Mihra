@@ -1,0 +1,19 @@
+{
+  "name": "mihra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MİHRA: namaz vakitleri, kıble, zikir, Kur’an ve dinî bilgiler",
+  "scripts": {
+    "build": "node scripts/build-www.js",
+    "android": "npm run build && npx cap sync android",
+    "apk": "npm run android && cd android && gradlew.bat assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/local-notifications": "8.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.0"
+  }
+}

@@ -1,5 +1,5 @@
 /* ---- PWA: service worker kaydı ve "uygulamayı yükle" ---- */
-if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+if('serviceWorker' in navigator&&location.protocol!=='file:'&&!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 let installEv=null;
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEv=e;if(U.settings)R()});

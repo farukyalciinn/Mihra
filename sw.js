@@ -1,10 +1,10 @@
 /* MİHRA service worker: uygulama kabuğunu önbelleğe alır, internet yokken de açılmasını sağlar.
    Dosya listesi değişince VERSION'ı artır. */
-const VERSION = 'mihra-v4';
+const VERSION = 'mihra-v6';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
   'js/data.js', 'js/core.js', 'js/vakitler.js', 'js/kible.js', 'js/zikir.js', 'js/kuran.js',
-  'js/ogren.js', 'js/bildirim.js', 'js/duvar.js', 'js/ayarlar.js', 'js/app.js', 'js/pwa.js',
+  'js/ogren.js', 'js/bildirim.js', 'js/duvar.js', 'js/ayarlar.js', 'js/app.js', 'js/pwa.js', 'js/native.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'
 ];
 // Çevrimdışı da işe yarayan API yanıtları (vakitler, sureler)
