@@ -79,3 +79,11 @@ select{width:100%;background:var(--card2);color:var(--cream);border:1px solid va
 #tabs button{background:none;color:var(--mint);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:4px 8px}#tabs button i{font-style:normal;font-size:21px}
 #tabs button.on{color:var(--gold)}
 #toast{position:fixed;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px));max-width:528px;margin:auto;background:var(--gold);color:var(--bg);padding:12px 14px;border-radius:12px;font-weight:600;display:none;z-index:40}
+.rf:disabled{opacity:.3;cursor:default}
+.imw{overflow-x:auto;margin:0 -6px}
+.imt{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums;text-align:center}
+.imt th{font-size:11px;font-weight:700;padding:6px 2px;border-bottom:1px solid #94A89C;position:sticky;top:0;background:var(--paper)}
+.imt td{padding:6px 2px;border-bottom:.5px solid #C4D1C7;white-space:nowrap}
+.imt td:first-child{text-align:left;padding-left:6px}.imt td small{display:block;font-size:10px;opacity:.7}
+.imt tr.rm td:first-child{box-shadow:inset 3px 0 var(--gold)}
+.imt tr.on td{background:var(--card);color:var(--gold);font-weight:700}

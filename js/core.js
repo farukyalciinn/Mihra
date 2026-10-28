@@ -12,7 +12,7 @@ const init={setup:false,country:'Türkiye',city:'İstanbul',notifications:true,d
 let S=Object.assign({},init);try{S=Object.assign(S,JSON.parse(localStorage.getItem('mihra-v1')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('mihra-v1',JSON.stringify(S))}catch(e){}};
 const blank=()=>({name:'',cat:'Kişisel',ar:'',pron:'',meaning:''});
-const U={stage:S.setup?3:0,tab:'Vakitler',settings:false,zs:'Zikirmatik',duaCat:'Günlük',duaOpen:'',edit:-1,draft:blank(),lcat:'İbadet',lesson:'',step:0,prayer:'Öğle',guide:false,qv:'Sureler',query:'',openS:0,gpart:0,gstep:0,gmode:'alone',gopen:false,gfor:'',vopen:'',ayi:-1,esi:-1,stab:'Konum',abt:'',reader:0,lq:'',eopen:false,ww:0,wst:'zumrut',fs:22,loc:'idle',locErr:'',manual:false,pc:null,cityRes:[],cityMsg:''};
+const U={stage:S.setup?3:0,tab:'Vakitler',settings:false,zs:'Zikirmatik',duaCat:'Günlük',duaOpen:'',edit:-1,draft:blank(),lcat:'İbadet',lesson:'',step:0,prayer:'Öğle',guide:false,qv:'Sureler',query:'',openS:0,gpart:0,gstep:0,gmode:'alone',gopen:false,gfor:'',vopen:'',imsak:false,imm:0,ayi:-1,esi:-1,stab:'Konum',abt:'',reader:0,lq:'',eopen:false,ww:0,wst:'zumrut',fs:22,loc:'idle',locErr:'',manual:false,pc:null,cityRes:[],cityMsg:''};
 const T={status:'idle',t:null,lat:null,lon:null,demo:false,gps:null};
 const K={aligned:false,heading:null,st:'idle',on:false,msg:''};
 const iosPerm=typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function';

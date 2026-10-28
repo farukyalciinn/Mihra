@@ -1,6 +1,6 @@
 /* MİHRA service worker: uygulama kabuğunu önbelleğe alır, internet yokken de açılmasını sağlar.
    Dosya listesi değişince VERSION'ı artır. */
-const VERSION = 'mihra-v2';
+const VERSION = 'mihra-v3';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
   'js/data.js', 'js/core.js', 'js/vakitler.js', 'js/kible.js', 'js/zikir.js', 'js/kuran.js',

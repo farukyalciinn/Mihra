@@ -52,6 +52,8 @@ case 'goku':U.gopen=!U.gopen;return go();
 case 'gprev':U.gstep=Math.max(0,U.gstep-1);U.gopen=false;return go();
 case 'gnext':{const n=nextP();const pt=n&&RK[n.name][U.gpart];if(!pt)return;const N=genSteps(pt[2],pt[1],U.gmode).length;if(U.gstep>=N-1){U.guide=false;U.gstep=0;toast('Bu namazın adımlarını tamamladın. Allah kabul etsin.');return go()}U.gstep++;U.gopen=false;return go()}
 case 'vrow':U.vopen=U.vopen===v?'':v;return go();
+case 'imsak':U.imsak=!U.imsak;U.imm=0;return go();
+case 'imm':U.imm=+v;return go();
 case 'rfa':U.ayi=((U.ayi<0?Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/864e5)%AYET.length:U.ayi)+1)%AYET.length;return go();
 case 'rfe':U.esi=((U.esi<0?Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/864e5)%ESMA.length:U.esi)+1)%ESMA.length;return go();
 case 'compass':K.on=false;K.st='idle';compass().then(()=>{if(U.tab==='Kıble')R()});return;
