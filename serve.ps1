@@ -3,7 +3,7 @@ $l = New-Object System.Net.HttpListener
 $l.Prefixes.Add('http://localhost:8765/')
 $l.Start()
 Write-Output 'listening on 8765'
-$types = @{ '.html'='text/html; charset=utf-8'; '.css'='text/css; charset=utf-8'; '.js'='text/javascript; charset=utf-8' }
+$types = @{ '.html'='text/html; charset=utf-8'; '.css'='text/css; charset=utf-8'; '.js'='text/javascript; charset=utf-8'; '.png'='image/png'; '.webmanifest'='application/manifest+json' }
 while ($l.IsListening) {
   $c = $l.GetContext()
   $p = [Uri]::UnescapeDataString($c.Request.Url.AbsolutePath.TrimStart('/'))
