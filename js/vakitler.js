@@ -12,12 +12,24 @@ add(r+'. Rekât · Secdeler','“Allâhü ekber” diyerek secdeye gidilir ve ü
 if(r===n)add('Son Oturuş','Ettehiyyâtü, ardından salavatlar (Allâhümme salli – Allâhümme bârik) ve Rabbenâ duaları okunur.',[X.tah,X.salli,X.barik,X.ra1,X.ra2]);
 else if(r===2)add('İlk Oturuş','Oturulur ve yalnızca Ettehiyyâtü okunur; ardından “Allâhü ekber” diyerek ayağa kalkılır.',[X.tah])}
 add('Selam','Önce sağa, sonra sola dönerek selam verilir.',[X.sel]);return S}
-async function loadTimes(){T.status='loading';const day=new Date().toDateString();const has=S.lat!=null&&S.lon!=null;const key='mihra-t-'+(has?(+S.lat).toFixed(2)+','+(+S.lon).toFixed(2):S.country+S.city)+day;const m=(S.cc?S.cc==='TR':S.country==='Türkiye')?13:3;
-try{const u=has?`https://api.aladhan.com/v1/timings?latitude=${S.lat}&longitude=${S.lon}&method=${m}`:`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(ascii(S.city))}&country=${encodeURIComponent(EN[S.country]||S.country)}&method=${m}`;
-const j=await (await fetch(u)).json();if(!j.data||!j.data.timings)throw 0;T.t=j.data.timings;T.lat=j.data.meta&&j.data.meta.latitude;T.lon=j.data.meta&&j.data.meta.longitude;T.demo=false;T.status='ok';try{localStorage.setItem(key,JSON.stringify([T.t,T.lat,T.lon]))}catch(e){}}
-catch(e){let c=null;try{c=JSON.parse(localStorage.getItem(key))}catch(x){}if(c){T.t=c[0];T.lat=c[1];T.lon=c[2];T.status='cache';T.demo=false}else{T.t=DEMO;T.demo=true;T.status='error'}}
-if(U.stage===3&&(U.tab==='Vakitler'||U.tab==='Kıble'))R()}
-function nextP(){if(!T.t)return null;const n=new Date(),s=n.getHours()*3600+n.getMinutes()*60+n.getSeconds();const l=PR5.map(([a,b])=>{const m=/(\d+):(\d+)/.exec(T.t[b]||'');return m?{name:a,time:m[1].padStart(2,'0')+':'+m[2],sec:(+m[1])*3600+(+m[2])*60}:null}).filter(Boolean);let x=l.find(i=>i.sec>s),d;if(x)d=x.sec-s;else{x=l[0];d=86400-s+x.sec}return {name:x.name,time:x.time,left:pad(Math.floor(d/3600))+':'+pad(Math.floor(d%3600/60))+':'+pad(d%60)}}
+/* Vakitler aylık takvim olarak çekilip saklanır; ay boyunca internetsiz de doğru vakit gösterilir */
+const dkey=d=>pad(d.getDate())+'-'+pad(d.getMonth()+1)+'-'+d.getFullYear();
+const tmeth=()=>(S.cc?S.cc==='TR':S.country==='Türkiye')?13:3;
+const tloc=()=>S.lat!=null&&S.lon!=null?(+S.lat).toFixed(2)+','+(+S.lon).toFixed(2):S.country+'|'+S.city;
+const mkey=(y,mo)=>'mihra-ay-'+tmeth()+'-'+tloc()+'-'+y+'-'+pad(mo);
+const dayTimes=d=>{let c=null;try{c=JSON.parse(localStorage.getItem(mkey(d.getFullYear(),d.getMonth()+1)))}catch(e){}return c&&c.days[dkey(d)]?{t:c.days[dkey(d)],lat:c.lat,lon:c.lon}:null};
+function pickDay(){const n=new Date(),x=dayTimes(n);if(!x)return false;const tm=dayTimes(new Date(n.getFullYear(),n.getMonth(),n.getDate()+1));T.t=x.t;T.tm=tm?tm.t:null;T.lat=x.lat;T.lon=x.lon;T.day=dkey(n);T.demo=false;return true}
+async function fetchMonth(y,mo){const has=S.lat!=null&&S.lon!=null,m=tmeth();
+const u=has?`https://api.aladhan.com/v1/calendar/${y}/${mo}?latitude=${S.lat}&longitude=${S.lon}&method=${m}`:`https://api.aladhan.com/v1/calendarByCity/${y}/${mo}?city=${encodeURIComponent(ascii(S.city))}&country=${encodeURIComponent(EN[S.country]||S.country)}&method=${m}`;
+const j=await (await fetch(u)).json();if(!Array.isArray(j.data)||!j.data.length)throw 0;const days={},mt=j.data[0].meta||{};j.data.forEach(x=>{days[x.date.gregorian.date]=x.timings});
+try{localStorage.setItem(mkey(y,mo),JSON.stringify({lat:mt.latitude,lon:mt.longitude,days}))}catch(e){}}
+function pruneTimes(){const n=new Date(),cur=n.getFullYear()*12+n.getMonth();try{Object.keys(localStorage).forEach(k=>{const m=/^mihra-ay-.*-(\d{4})-(\d{2})$/.exec(k);if(k.indexOf('mihra-t-')===0||m&&(+m[1])*12+(+m[2])-1<cur)localStorage.removeItem(k)})}catch(e){}}
+async function loadTimes(){T.status='loading';const n=new Date();
+try{await fetchMonth(n.getFullYear(),n.getMonth()+1);T.status='ok'}catch(e){T.status='cache'}
+if(!pickDay()){T.t=DEMO;T.tm=null;T.day=null;T.demo=true;T.status='error'}
+if(U.stage===3&&(U.tab==='Vakitler'||U.tab==='Kıble'))R();
+pruneTimes();if(n.getDate()>=20){const nx=new Date(n.getFullYear(),n.getMonth()+1,1);try{await fetchMonth(nx.getFullYear(),nx.getMonth()+1);if(T.status!=='error')pickDay()}catch(e){}}}
+function nextP(){if(!T.t)return null;const n=new Date(),s=n.getHours()*3600+n.getMinutes()*60+n.getSeconds();const l=PR5.map(([a,b])=>{const m=/(\d+):(\d+)/.exec(T.t[b]||'');return m?{name:a,time:m[1].padStart(2,'0')+':'+m[2],sec:(+m[1])*3600+(+m[2])*60}:null}).filter(Boolean);let x=l.find(i=>i.sec>s),d;if(x)d=x.sec-s;else{const f=T.tm&&/(\d+):(\d+)/.exec(T.tm.Fajr||'');x=f?{name:l[0].name,time:f[1].padStart(2,'0')+':'+f[2],sec:(+f[1])*3600+(+f[2])*60}:l[0];d=86400-s+x.sec}return {name:x.name,time:x.time,left:pad(Math.floor(d/3600))+':'+pad(Math.floor(d%3600/60))+':'+pad(d%60)}}
 const getPos=()=>new Promise((res,rej)=>{if(!navigator.geolocation||!window.isSecureContext)return rej('unsupported');navigator.geolocation.getCurrentPosition(p=>res(p.coords),e=>rej(e.code===1?'denied':'error'),{timeout:15000,maximumAge:60000})});
 async function geo(la,lo){try{const j=await (await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${la}&longitude=${lo}&localityLanguage=tr`)).json();const cc=j.countryCode||'';const c=cc==='TR'?(j.principalSubdivision||j.city):(j.city||j.locality||j.principalSubdivision);return {country:j.countryName||'',cc,city:(c||'Konumum').replace(/ (İli|Province)$/,'')}}catch(e){return {country:'',cc:'',city:'Konumum'}}}
 async function locate(){U.loc='loading';R();try{const c=await getPos();const g=await geo(c.latitude,c.longitude);Object.assign(S,{lat:c.latitude,lon:c.longitude,auto:true,country:g.country,city:g.city,cc:g.cc});save();U.loc='ok';U.manual=false;if(U.stage===1)U.stage=2;toast('Konum bulundu: '+S.city+(S.country?', '+S.country:''));loadTimes();R()}catch(e){U.loc='fail';U.locErr=String(e);R()}}

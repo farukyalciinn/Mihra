@@ -1,6 +1,6 @@
 /* MİHRA service worker: uygulama kabuğunu önbelleğe alır, internet yokken de açılmasını sağlar.
    Dosya listesi değişince VERSION'ı artır. */
-const VERSION = 'mihra-v1';
+const VERSION = 'mihra-v2';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
   'js/data.js', 'js/core.js', 'js/vakitler.js', 'js/kible.js', 'js/zikir.js', 'js/kuran.js',
@@ -19,6 +19,15 @@ self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
     .then(ks => Promise.all(ks.filter(k => k !== VERSION && k !== API_CACHE).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
+});
+
+// Bildirime dokununca açık pencereyi öne getir, yoksa uygulamayı aç
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(ws => {
+    const w = ws.find(c => c.url.startsWith(self.registration.scope));
+    return w ? w.focus() : self.clients.openWindow('./');
+  }));
 });
 
 self.addEventListener('fetch', e => {
