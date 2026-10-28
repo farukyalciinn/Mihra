@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "MİHRA",
+    "slug": "mihra",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#102D27",
+    "ios": {
+      "bundleIdentifier": "com.farukyalciinn.mihra",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Namaz vakitlerini ve kıble yönünü konumuna göre hesaplamak için konumunu kullanırız.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": { "package": "com.farukyalciinn.mihra" },
+    "plugins": ["expo-location"]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "MİHRA",
+    "slug": "mihra",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "bundleIdentifier": "com.farukyalciinn.mihra",
+      "supportsTablet": true,
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.farukyalciinn.mihra"
+        ]
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Namaz vakitlerini ve kıble yönünü konumuna göre hesaplamak için konumunu kullanırız.",
+        "NSMotionUsageDescription": "Kıble pusulası için cihazın yön sensörünü kullanırız.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "plugins": [
+      "@bacons/apple-targets",
+      "expo-location"
+    ]
+  }
+}
